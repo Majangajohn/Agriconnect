@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnect Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        secondary: {
+                            100: '#fffbeb',
+                            200: '#fef3c7',
+                            300: '#fde68a',
+                            400: '#fcd34d',
+                            500: '#fbbf24',
+                            600: '#f59e0b',
+                            700: '#d97706',
+                            800: '#b45309',
+                            900: '#92400e',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md py-4 sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="text-primary-600 dark:text-primary-400 text-2xl font-bold mr-2">
+                        <i class="fas fa-leaf"></i> AgriConnect
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Home</a>
+                    <a href="#market-data" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Market Data</a>
+                    <a href="#farming-advice" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Farming Advice</a>
+                    <a href="#partners" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Partners</a>
+                </div>
+                <div class="flex items-center">
+                    <div class="md:block hidden relative">
+                        <input type="text" placeholder="Search crops, markets..." class="bg-gray-100 dark:bg-gray-700 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-700 dark:text-gray-200 w-64">
+                        <button class="absolute right-3 top-2 text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <button class="ml-4 bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <a href="{{ url_for('login') }}"> Sign In </a>
+                    </button>
+                    <button class="md:hidden ml-4 text-gray-700 dark:text-gray-300 focus:outline-none" id="mobile-menu-button">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div class="md:hidden hidden mt-3 px-2 pt-2 pb-4 space-y-1 bg-gray-50 dark:bg-gray-800 rounded-md" id="mobile-menu">
+                <a href="#home" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md">Home</a>
+                <a href="#market-data" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md">Market Data</a>
+                <a href="#farming-advice" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md">Farming Advice</a>
+                <a href="#partners" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md">Partners</a>
+                <div class="relative mt-2">
+                    <input type="text" placeholder="Search crops, markets..." class="bg-gray-100 dark:bg-gray-700 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-700 dark:text-gray-200 w-full">
+                    <button class="absolute right-3 top-2 text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative">
+        <div class="bg-cover bg-center h-[500px]" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');">
+            <div class="container mx-auto px-4 h-full flex items-center">
+                <div class="max-w-3xl text-white">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Smart Farming Insights for Better Yields</h1>
+                    <p class="text-xl mb-8">Access real-time market data, personalized farming advice, and predictive analytics to optimize your agricultural practices.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button class="bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-md shadow-lg text-lg font-medium transition duration-300 ease-in-out transform hover:scale-105">
+                            Get Started
+                        </button>
+                        <button class="bg-white hover:bg-gray-100 text-primary-700 py-3 px-6 rounded-md shadow-lg text-lg font-medium transition duration-300 ease-in-out transform hover:scale-105">
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="container mx-auto px-4 -mt-16 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition duration-500 hover:scale-105">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Market Insights</h3>
+                        <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                            <i class="fas fa-chart-line text-primary-600 dark:text-primary-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Real-time price analytics and demand forecasting for agricultural products.</p>
+                    <a href="#market-data" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">View Market Data <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition duration-500 hover:scale-105">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Farming Recommendations</h3>
+                        <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                            <i class="fas fa-seedling text-primary-600 dark:text-primary-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Personalized crop recommendations based on location, soil analysis and market demand.</p>
+                    <a href="#farming-advice" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">Get Farming Advice <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition duration-500 hover:scale-105">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Premium Features</h3>
+                        <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                            <i class="fas fa-star text-primary-600 dark:text-primary-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Unlock advanced analytics, personalized forecasts, and expert consultations.</p>
+                    <a href="#" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">Enroll Now <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Data Section -->
+    <section id="market-data" class="py-16 bg-gray-50 dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Market Dynamics & Price Trends</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Stay informed with real-time agricultural market data, price trends, and demand projections to make informed farming decisions.</p>
+            </div>
+
+            <!-- Market Chart Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-10">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 md:mb-0">Crop Price Trends & Projections</h3>
+                    <div class="flex space-x-2">
+                        <select id="cropSelect" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-base">
+                            <option value="maize">Maize</option>
+                            <option value="rice">Rice</option>
+                            <option value="wheat">Wheat</option>
+                            <option value="soybean">Soybean</option>
+                            <option value="coffee">Coffee</option>
+                        </select>
+                        <select id="timeframeSelect" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-base">
+                            <option value="1month">1 Month</option>
+                            <option value="3months">3 Months</option>
+                            <option value="6months" selected>6 Months</option>
+                            <option value="1year">1 Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-80">
+                    <canvas id="marketChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Crop Market Insights -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Top Demanded Crops</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-lg font-medium text-gray-700 dark:text-gray-300">1. Maize</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm font-medium">High Demand</span>
+                                <span class="text-green-600 dark:text-green-400 ml-2"><i class="fas fa-arrow-up"></i> 12%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-lg font-medium text-gray-700 dark:text-gray-300">2. Cassava</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm font-medium">Medium Demand</span>
+                                <span class="text-green-600 dark:text-green-400 ml-2"><i class="fas fa-arrow-up"></i> 8%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-lg font-medium text-gray-700 dark:text-gray-300">3. Beans</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm font-medium">High Demand</span>
+                                <span class="text-green-600 dark:text-green-400 ml-2"><i class="fas fa-arrow-up"></i> 15%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-lg font-medium text-gray-700 dark:text-gray-300">4. Coffee</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-sm font-medium">Stable</span>
+                                <span class="text-yellow-600 dark:text-yellow-400 ml-2"><i class="fas fa-equals"></i> 0%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-lg font-medium text-gray-700 dark:text-gray-300">5. Tomatoes</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-sm font-medium">Low Demand</span>
+                                <span class="text-red-600 dark:text-red-400 ml-2"><i class="fas fa-arrow-down"></i> 5%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Market Price Analysis</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium text-gray-700 dark:text-gray-300">Maize</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">$240/ton</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 80%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Projected: <span class="text-green-600 dark:text-green-400">↑ $258/ton</span></span>
+                                <span>3 month forecast</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium text-gray-700 dark:text-gray-300">Rice</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">$420/ton</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Projected: <span class="text-green-600 dark:text-green-400">↑ $435/ton</span></span>
+                                <span>3 month forecast</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium text-gray-700 dark:text-gray-300">Cassava</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">$180/ton</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 65%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Projected: <span class="text-yellow-600 dark:text-yellow-400">→ $182/ton</span></span>
+                                <span>3 month forecast</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium text-gray-700 dark:text-gray-300">Coffee</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">$4,500/ton</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 90%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Projected: <span class="text-green-600 dark:text-green-400">↑ $4,750/ton</span></span>
+                                <span>3 month forecast</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    View Full Market Analysis
+                </button>
+                <p class="mt-4 text-gray-600 dark:text-gray-400">Premium subscribers receive detailed market forecasts and price alerts.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Farming Advice Section -->
+    <section id="farming-advice" class="py-16 bg-white dark:bg-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Personalized Farming Advice</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Get tailored recommendations based on your location's soil composition, weather patterns, and market trends.</p>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-10">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Find Farming Recommendations For Your Area</h3>
+                
+                <div class="mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="col-span-2">
+                            <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                            <input type="text" id="location" placeholder="Enter city, region or coordinates" class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-700 rounded-md py-3 px-4 text-base focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Area Size (optional)</label>
+                            <div class="flex">
+                                <input type="number" placeholder="Size" class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-700 rounded-l-md py-3 px-4 text-base focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <select class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-300 rounded-r-md px-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option>acres</option>
+                                    <option>hectares</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="getAdviceBtn" class="bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full md:w-auto">
+                    Get Farming Advice
+                </button>
+            </div>
+
+            <!-- Results Section (hidden by default) -->
+            <div id="adviceResults" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <!-- Weather Analysis -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Weather Patterns</h3>
+                            <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
+                                <i class="fas fa-cloud-sun text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div id="weatherDetails" class="space-y-4">
+                            <!-- Weather data will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Soil Analysis -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Soil Composition</h3>
+                            <div class="bg-brown-100 dark:bg-yellow-900 p-2 rounded-full">
+                                <i class="fas fa-mountain text-yellow-800 dark:text-yellow-400"></i>
+                            </div>
+                        </div>
+                        <div id="soilDetails" class="space-y-4">
+                            <!-- Soil data will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Crop Recommendations -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Crop Recommendations</h3>
+                            <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                                <i class="fas fa-seedling text-green-600 dark:text-green-400"></i>
+                            </div>
+                        </div>
+                        <div id="cropRecommendations" class="space-y-4">
+                            <!-- Crop recommendations will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Crop Recommendations -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-10">
+                    <ul class="flex flex-wrap border-b border-gray-200 dark:border-gray-700 text-center" id="cropTabs" role="tablist">
+                        <li class="mr-2">
+                            <a id="food-crops-tab" href="#food-crops" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-600 dark:hover:text-gray-300 text-gray-500 dark:text-gray-400 font-medium active" role="tab" aria-selected="true">Food Crops</a>
+                        </li>
+                        <li class="mr-2">
+                            <a id="cash-crops-tab" href="#cash-crops" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-600 dark:hover:text-gray-300 text-gray-500 dark:text-gray-400 font-medium" role="tab" aria-selected="false">Cash Crops</a>
+                        </li>
+                    </ul>
+
+                    <div id="cropTabContent" class="mt-6">
+                        <div id="food-crops" class="active" role="tabpanel" aria-labelledby="food-crops-tab">
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Recommended Food Crops</h4>
+                            <div id="foodCropsDetails" class="space-y-6">
+                                <!-- Food crops details will be inserted here -->
+                            </div>
+                        </div>
+                        <div id="cash-crops" class="hidden" role="tabpanel" aria-labelledby="cash-crops-tab">
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Recommended Cash Crops</h4>
+                            <div id="cashCropsDetails" class="space-y-6">
+                                <!-- Cash crops details will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Want detailed soil analysis reports, personalized crop rotation plans, and expert consultation?</p>
+                    <button class="bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Upgrade to Premium
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partners" class="py-16 bg-gray-50 dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Partners</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">We collaborate with leading agricultural organizations, research institutions, and technology providers to deliver the most accurate information.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow h-32">
+                    <div class="text-center">
+                        <i class="fas fa-university text-4xl text-primary-600 dark:text-primary-400 mb-2"></i>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">Agri University</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow h-32">
+                    <div class="text-center">
+                        <i class="fas fa-flask text-4xl text-primary-600 dark:text-primary-400 mb-2"></i>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">Research Institute</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow h-32">
+                    <div class="text-center">
+                        <i class="fas fa-satellite text-4xl text-primary-600 dark:text-primary-400 mb-2"></i>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">SatelliteData Inc</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow h-32">
+                    <div class="text-center">
+                        <i class="fas fa-tractor text-4xl text-primary-600 dark:text-primary-400 mb-2"></i>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">FarmTech Solutions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 text-center">Become a Partner</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-center">Are you an agricultural organization or technology provider interested in collaborating with us?</p>
+                <div class="flex justify-center">
+                    <button class="bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Contact Us
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-16 bg-primary-700 dark:bg-primary-800">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="mb-8 md:mb-0 md:mr-8">
+                    <h2 class="text-3xl font-bold text-white mb-4">Ready to Transform Your Farming?</h2>
+                    <p class="text-xl text-primary-100 max-w-2xl">Join thousands of farmers who are optimizing their yields and maximizing profits with our data-driven insights.</p>
+                </div>
+                <div class="flex flex-col space-y-4">
+                    <button class="bg-white hover:bg-gray-100 text-primary-700 py-3 px-8 rounded-md shadow-lg text-lg font-medium transition duration-300 ease-in-out transform hover:scale-105">
+                        Sign Up Now
+                    </button>
+                    <a href="#" class="text-center text-primary-100 hover:text-white">Learn more about our plans</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-10">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">AgriTech</h3>
+                    <p class="text-gray-400">Empowering farmers with data-driven insights for sustainable and profitable agriculture.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="#market-data" class="text-gray-400 hover:text-white transition duration-300">Market Data</a></li>
+                        <li><a href="#farming-advice" class="text-gray-400 hover:text-white transition duration-300">Farming Advice</a></li>
+                        <li><a href="#partners" class="text-gray-400 hover:text-white transition duration-300">Partners</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Support</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Knowledge Base</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fas fa-envelope mr-2"></i> info@agritech.com</li>
+                        <li><i class="fas fa-phone mr-2"></i> +1 (555) 123-4567</li>
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> 123 Farming St, Agriville</li>
+                    </ul>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-gray-800 text-center text-gray-500">
+                <p>&copy; 2023 AgriTech. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Market Chart Initialization
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            const cropSelect = document.getElementById('cropSelect');
+            const timeframeSelect = document.getElementById('timeframeSelect');
+
+            // Sample data for the chart
+            const marketData = {
+                'maize': {
+                    '1month': {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        actual: [220, 230, 235, 240],
+                        projected: [null, null, null, 240, 245, 250, 258]
+                    },
+                    '3months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        actual: [200, 210, 220, 230, 235, 240],
+                        projected: [null, null, null, null, null, 240, 245, 250, 258]
+                    },
+                    '6months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        actual: [190, 200, 210, 220, 230, 235, 240],
+                        projected: [null, null, null, null, null, null, 240, 245, 250, 258, 265, 270]
+                    },
+                    '1year': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                        actual: [180, 185, 190, 200, 210, 220, 230, 235, 240],
+                        projected: [null, null, null, null, null, null, null, null, 240, 245, 250, 258, 265, 270, 275]
+                    }
+                },
+                'rice': {
+                    '6months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        actual: [390, 395, 400, 405, 410, 415, 420],
+                        projected: [null, null, null, null, null, null, 420, 425, 430, 435, 440, 445]
+                    }
+                },
+                'wheat': {
+                    '6months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        actual: [290, 295, 300, 305, 310, 315, 320],
+                        projected: [null, null, null, null, null, null, 320, 325, 330, 335, 340, 345]
+                    }
+                },
+                'soybean': {
+                    '6months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        actual: [450, 460, 470, 480, 490, 500, 510],
+                        projected: [null, null, null, null, null, null, 510, 515, 520, 525, 530, 535]
+                    }
+                },
+                'coffee': {
+                    '6months': {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        actual: [4300, 4350, 4400, 4430, 4460, 4480, 4500],
+                        projected: [null, null, null, null, null, null, 4500, 4550, 4600, 4650, 4700, 4750]
+                    }
+                }
+            };
+
+            let marketChart;
+
+            function updateMarketChart() {
+                const crop = cropSelect.value;
+                const timeframe = timeframeSelect.value;
+                
+                // Default to 6months if the selected timeframe isn't available
+                const selectedTimeframe = marketData[crop][timeframe] || marketData[crop]['6months'];
+                
+                if (marketChart) {
+                    marketChart.destroy();
+                }
+
+                marketChart = new Chart(marketCtx, {
+                    type: 'line',
+                    data: {
+                        labels: selectedTimeframe.labels,
+                        datasets: [
+                            {
+                                label: 'Actual Price ($/ton)',
+                                data: selectedTimeframe.actual,
+                                borderColor: '#16a34a',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Projected Price ($/ton)',
+                                data: selectedTimeframe.projected,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 8
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Price ($/ton)'
+                                },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            cropSelect.addEventListener('change', updateMarketChart);
+            timeframeSelect.addEventListener('change', updateMarketChart);
+
+            // Initialize with default values
+            updateMarketChart();
+
+            // Farming Advice Tab Toggling
+            const cropTabs = document.querySelectorAll('#cropTabs a');
+            const cropTabContents = document.querySelectorAll('#cropTabContent > div');
+
+            cropTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove 'active' class from all tabs and tab contents
+                    cropTabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
+                        t.classList.remove('border-primary-600', 'text-primary-600', 'dark:border-primary-500', 'dark:text-primary-500');
+                    });
+                    
+                    cropTabContents.forEach(content => {
+                        content.classList.add('hidden');
+                        content.classList.remove('active');
+                    });
+                    
+                    // Add 'active' class to current tab and tab content
+                    this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
+                    this.classList.add('border-primary-600', 'text-primary-600', 'dark:border-primary-500', 'dark:text-primary-500');
+                    
+                    const targetId = this.getAttribute('href');
+                    document.querySelector(targetId).classList.remove('hidden');
+                    document.querySelector(targetId).classList.add('active');
+                });
+            });
+
+            // Initialize the first tab as active
+            cropTabs[0].classList.add('border-primary-600', 'text-primary-600', 'dark:border-primary-500', 'dark:text-primary-500');
+
+            // Get Farming Advice Button Functionality
+            const getAdviceBtn = document.getElementById('getAdviceBtn');
+            const adviceResults = document.getElementById('adviceResults');
+            const locationInput = document.getElementById('location');
+
+            getAdviceBtn.addEventListener('click', function() {
+                if (locationInput.value.trim() === '') {
+                    alert('Please enter a location');
+                    return;
+                }
+
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Loading...';
+                this.disabled = true;
+
+                // Simulate API request
+                setTimeout(() => {
+                    // Hide loading state
+                    this.innerHTML = 'Get Farming Advice';
+                    this.disabled = false;
+
+                    // Show results
+                    adviceResults.classList.remove('hidden');
+
+                    // Populate weather data
+                    document.getElementById('weatherDetails').innerHTML = `
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-700 dark:text-gray-300">Current Season: Rainy Season</h4>
+                            <p class="text-gray-600 dark:text-gray-400">April to October</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-400">Avg. Rainfall</p>
+                                <p class="font-medium text-gray-700 dark:text-gray-300">800-1200mm/year</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-400">Avg. Temperature</p>
+                                <p class="font-medium text-gray-700 dark:text-gray-300">22-28°C</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-400">Humidity</p>
+                                <p class="font-medium text-gray-700 dark:text-gray-300">65-85%</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 dark:text-gray-400">Sunshine Hours</p>
+                                <p class="font-medium text-gray-700 dark:text-gray-300">5-7 hours/day</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">* Based on historical data for ${locationInput.value}</p>
+                        </div>
+                    `;
+
+                    // Populate soil data
+                    document.getElementById('soilDetails').innerHTML = `
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-700 dark:text-gray-300">Soil Type: Clay Loam</h4>
+                            <p class="text-gray-600 dark:text-gray-400">Good water retention, medium drainage</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Nitrogen (N)</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Medium</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Phosphorus (P)</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">High</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: 80%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Potassium (K)</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Medium</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: 55%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">pH Level</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">6.2 (Slightly Acidic)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: 62%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Populate crop recommendations
+                    document.getElementById('cropRecommendations').innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Top Food Crops</span>
+                            <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">High Compatibility</span>
+                        </div>
+                        <div class="pl-4 border-l-2 border-primary-500">
+                            <ul class="list-disc list-inside text-gray-600 dark:text-gray-400">
+                                <li>Maize</li>
+                                <li>Beans</li>
+                                <li>Sweet Potatoes</li>
+                                <li>Cassava</li>
+                            </ul>
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Top Cash Crops</span>
+                            <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">High Compatibility</span>
+                        </div>
+                        <div class="pl-4 border-l-2 border-primary-500">
+                            <ul class="list-disc list-inside text-gray-600 dark:text-gray-400">
+                                <li>Coffee</li>
+                                <li>Soybeans</li>
+                                <li>Groundnuts</li>
+                                <li>Sunflower</li>
+                            </ul>
+                        </div>
+                    `;
+
+                    // Populate food crops details
+                    document.getElementById('foodCropsDetails').innerHTML = `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Maize</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">High Yield Potential</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> April - August</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 90-120 days</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 4-6 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $240/ton</li>
+                                    <li><span class="font-medium">Local Demand:</span> High</li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Ideal for the current soil conditions. Consider supplementing with nitrogen fertilizer for optimal yields.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Beans</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Quick Maturity</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> March - June</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 60-90 days</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 1.5-2 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $700/ton</li>
+                                    <li><span class="font-medium">Local Demand:</span> Very High</li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Excellent as an intercrop with maize. Improves soil nitrogen content for subsequent plantings.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Sweet Potatoes</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Drought Resistant</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> Year-round</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 3-5 months</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 10-15 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $200/ton</li>
+                                    <li><span class="font-medium">Local Demand:</span> Medium</li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Adaptable to various soil conditions, resistant to dry spells that may occur in your region.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Cassava</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Long Shelf Life</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> Year-round</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 9-12 months</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 20-25 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $180/ton</li>
+                                    <li><span class="font-medium">Local Demand:</span> Medium-High</li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Highly tolerant to poor soil conditions and drought. Can remain in the ground as storage until needed.</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Populate cash crops details
+                    document.getElementById('cashCropsDetails').innerHTML = `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Coffee</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">High Market Value</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Type:</span> Perennial</li>
+                                    <li><span class="font-medium">First Harvest:</span> 3-4 years</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 0.5-1 ton/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $4,500/ton</li>
+                                    <li><span class="font-medium">Market Projection:</span> <span class="text-green-600 dark:text-green-400">↑ Rising (5-7%)</span></li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Long-term investment with high returns. Shade-grown coffee can be intercropped with banana.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Soybeans</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Growing Demand</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> April - August</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 100-120 days</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 2-3 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $510/ton</li>
+                                    <li><span class="font-medium">Market Projection:</span> <span class="text-green-600 dark:text-green-400">↑ Rising (3-5%)</span></li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">High protein content makes it valuable for food processing and animal feed industries.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Groundnuts</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Soil Enriching</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> March - July</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 90-110 days</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 1-1.5 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $850/ton</li>
+                                    <li><span class="font-medium">Market Projection:</span> <span class="text-yellow-600 dark:text-yellow-400">→ Stable</span></li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Excellent for crop rotation as it fixes nitrogen in the soil. Multiple market opportunities.</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-lg font-medium text-gray-800 dark:text-gray-200">Sunflower</h5>
+                                    <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">Drought Tolerant</span>
+                                </div>
+                                <ul class="space-y-2 text-gray-600 dark:text-gray-400 mb-3">
+                                    <li><span class="font-medium">Growing Season:</span> February - May</li>
+                                    <li><span class="font-medium">Maturity Time:</span> 80-100 days</li>
+                                    <li><span class="font-medium">Expected Yield:</span> 1.5-2 tons/hectare</li>
+                                    <li><span class="font-medium">Market Value:</span> $600/ton</li>
+                                    <li><span class="font-medium">Market Projection:</span> <span class="text-green-600 dark:text-green-400">↑ Rising (2-4%)</span></li>
+                                </ul>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Oil extraction creates value-added opportunity. Bird protection measures recommended during flowering.</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Scroll to results
+                    window.scrollTo({
+                        top: adviceResults.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
