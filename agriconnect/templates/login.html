@@ -1,43 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-
-    {% if title %}
-        <title>{{ title }}</title>
-    {% else %}
-        <title>AgriConnect</title>
-    {% endif %}
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="min-h-screen">
-    <header class="border-b dark:border-gray-700">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center">
-                <i class="fas fa-leaf text-2xl text-green-500 mr-2"></i>
-                <h1 class="text-xl md:text-2xl font-bold">AgriConnect</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button id="languageToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <i class="fas fa-globe"></i>
-                    <span class="ml-1 hidden sm:inline">EN</span>
-                </button>
-                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <i class="fas fa-moon dark:hidden"></i>
-                    <i class="fas fa-sun hidden dark:block"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
+{% extends "base.html" %}
+{% block content %}
     <main class="container mx-auto px-4 py-6">
         <!-- Welcome Banner -->
         <div class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg p-4 mb-6">
@@ -47,7 +9,7 @@
                     <p class="opacity-90">Connecting farmers to weather, market data, and sustainable farming practices through a user-friendly app.</p>
                     <p class="opacity-90">Please Note that before Login in, You need to be registered with the ministry of Agriculture</p>
                 </div>
-               
+            
             </div>
         </div>
 
@@ -58,7 +20,16 @@
             </div>
 
             <div class="col-md-4">
-               <!-- Login page -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        </div>
+                    {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            <!-- Login page -->
                     <div class="content-section">
                         <form method="POST" action="">
                             {{ form.hidden_tag() }}
@@ -99,7 +70,7 @@
                                 {{ form.submit(class="btn btn-outline-info") }}
                             </div>
                             <small class="text-muted ml-2">
-                                <a href="#">Set/Forgot Password?</a>
+                                <a href="{{ url_for('confirm_registration') }}">Forgot Password?</a>
                             </small>
                         </form>
                     </div>
@@ -108,7 +79,7 @@
                 
             </div>
         </div>
-       
+    
         
     </main>
-
+{% endblock content%}
