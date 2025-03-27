@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request, flash
 from agriconnect import app, bcrypt, db, mail
 from agriconnect.forms import LoginForm, ConfirmRegistration, RegistrationForm, SetResetPasswordForm
 from agriconnect.models import User
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 from flask_mail import Message
 
 @app.route("/")
@@ -89,3 +89,12 @@ def set_reset_token(token):
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('login'))
     return render_template('set_reset_token.html', title='Set Reset Password', form=form)
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.route("/about")
+def about():
+     return render_template('about.html', title='About')

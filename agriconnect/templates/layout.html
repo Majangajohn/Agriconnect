@@ -71,6 +71,7 @@
                     <a href="#market-data" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Market Data</a>
                     <a href="#farming-advice" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Farming Advice</a>
                     <a href="#partners" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">Partners</a>
+                    <a href="{{ url_for('about') }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium">About</a>
                 </div>
                 <div class="flex items-center">
                     <div class="md:block hidden relative">
@@ -87,6 +88,7 @@
                     </button>
                 </div>
             </div>
+    {% block content %}
             <!-- Mobile Menu -->
             <div class="md:hidden hidden mt-3 px-2 pt-2 pb-4 space-y-1 bg-gray-50 dark:bg-gray-800 rounded-md" id="mobile-menu">
                 <a href="#home" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md">Home</a>
@@ -477,7 +479,7 @@
             </div>
         </div>
     </section>
-
+{% endblock %}
     <!-- Call to Action -->
     <section class="py-16 bg-primary-700 dark:bg-primary-800">
         <div class="container mx-auto px-4">
