@@ -279,9 +279,8 @@ Flask-Admin for quick admin interface setup
 Flask-RESTful for faster API development
 
 #### Visuals
-
-![Alt text](static/example2.png)
-![Alt text](static/example3.png)
-![Alt text](static/example4.png)
-![Alt text](static/example5.png)
-![Alt text](static/example6.png)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example2.jpg)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example3.jpg)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example4.jpg)
+![login page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example5.jpg)
+![dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example6.jpg)
