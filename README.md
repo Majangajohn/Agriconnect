@@ -15,6 +15,8 @@ https://www.linkedin.com/in/john-nyange-majanga-830915188
 This README provides guidance on navigating the codebase and understanding the file structure.
 
 #### File Structure
+
+
 agriconnect/
 ├── app/
 │   ├── __init__.py           # Initialize Flask application
@@ -25,10 +27,16 @@ agriconnect/
 │   │   ├── crop.py           # Crop model
 │   │   ├── location.py       # Location model
 │   │   ├── soil_data.py      # Soil data model
-│   │   ├── weather.py        # Weather model
-│   │   ├── market_data.py    # Market data model
+│   │   ├── weather.py 
+
+           # Weather model
+│   │   ├── market_data.py  
+
+          # Market data model
 │   │   └── recommendation.py # Recommendation model
 │   │
+
+
 │   ├── routes/               # Application routes
 │   │   ├── __init__.py
 │   │   ├── auth.py           # Authentication routes
@@ -36,6 +44,8 @@ agriconnect/
 │   │   ├── farming.py        # Farming advice routes
 │   │   └── main.py           # Main/index routes
 │   │
+
+
 │   ├── services/             # Business logic services
 │   │   ├── __init__.py
 │   │   ├── market_service.py
@@ -43,6 +53,8 @@ agriconnect/
 │   │   ├── soil_service.py
 │   │   └── recommendation_engine.py
 │   │
+
+
 │   ├── static/               # Static assets
 │   │   ├── css/              # Stylesheets
 │   │   ├── js/               # JavaScript files
@@ -51,6 +63,8 @@ agriconnect/
 │   │   │   └── farming-advice.js
 │   │   └── images/           # Image assets
 │   │
+
+
 │   ├── templates/            # HTML templates (Jinja2)
 │   │   ├── base.html         # Base template
 │   │   ├── index.html        # Home page
@@ -65,13 +79,19 @@ agriconnect/
 │   │       ├── header.html   # Header component
 │   │       └── footer.html   # Footer component
 │   │
+
+
 │   └── utils/                # Helper functions
 │       ├── __init__.py
 │       ├── api_connector.py  # External API connections
 │       └── data_formatter.py # Data formatting utilities
 │
+
+
 ├── migrations/               # Database migrations (Flask-Migrate)
 │
+
+
 ├── tests/                    # Automated tests
 │   ├── __init__.py
 │   ├── conftest.py           # Test configuration
@@ -79,6 +99,8 @@ agriconnect/
 │   ├── test_routes.py        # Route tests
 │   └── test_services.py      # Service tests
 │
+
+
 ├── venv/                     # Virtual environment (should be in .gitignore)
 ├── .env                      # Environment variables
 ├── .gitignore                # Git ignore file
