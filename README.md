@@ -8,8 +8,8 @@ AgriConnect is a web application designed to empower farmers with real-time info
 
 ## Deployed site link
 
-http://web-01.allnmj.tech/
-https://www.linkedin.com/in/john-nyange-majanga-830915188
+-- http://web-01.allnmj.tech/
+-- https://www.linkedin.com/in/john-nyange-majanga-830915188
 
 
 This README provides guidance on navigating the codebase and understanding the file structure.
