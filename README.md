@@ -2,7 +2,7 @@
 
 ##### Project Overview
 
-<img src="https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg?raw=true" alt="Alt text" width="300"/>
+![Alt text](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg)
 
 [![AgriConnect](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg?raw=true)
 
