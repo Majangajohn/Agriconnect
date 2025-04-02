@@ -2,14 +2,15 @@
 
 ##### Project Overview
 
-![Alt text](static/example.png)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg)
 
 AgriConnect is a web application designed to empower farmers with real-time information about weather patterns, market data, and sustainable farming practices.
 
 ## Deployed site link
 
-http://web-01.allnmj.tech/
-https://www.linkedin.com/in/john-nyange-majanga-830915188
+ http://web-01.allnmj.tech/
+ 
+ https://www.linkedin.com/in/john-nyange-majanga-830915188
 
 
 This README provides guidance on navigating the codebase and understanding the file structure.
@@ -301,9 +302,8 @@ Flask-Admin for quick admin interface setup
 Flask-RESTful for faster API development
 
 #### Visuals
-
-![Alt text](static/example2.png)
-![Alt text](static/example3.png)
-![Alt text](static/example4.png)
-![Alt text](static/example5.png)
-![Alt text](static/example6.png)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example2.jpg)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example3.jpg)
+![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example4.jpg)
+![login page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example5.jpg)
+![dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example6.jpg)
