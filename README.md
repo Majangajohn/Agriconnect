@@ -2,6 +2,8 @@
 
 ##### Project Overview
 
+<img src="https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg?raw=true" alt="Alt text" width="300"/>
+
 ![Alt text]https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example.jpg?raw=true
 
 AgriConnect is a web application designed to empower farmers with real-time information about weather patterns, market data, and sustainable farming practices.
