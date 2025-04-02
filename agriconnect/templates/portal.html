@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarmConnect - Supply Chain Management</title>
+    <title>AgriConnect - Supply Chain Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/marked@4.0.2/marked.min.js"></script>
     <script>
@@ -169,7 +169,7 @@
                             <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">John Smith</span>!</h2>
+                                        <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">{{  current_user.username }}</span>!</h2>
                                         <p class="text-gray-600 dark:text-gray-400" id="userRole">You are logged in as a Farmer.</p>
                                         <p class="mt-4">Quick Summary:</p>
                                         <ul class="mt-2 list-disc list-inside text-gray-600 dark:text-gray-400">

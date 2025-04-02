@@ -1,0 +1,123 @@
+Linux to update
+
+apt update && apt upgrade
+
+To change hostname
+
+hostname-ctl set-hostname ------------- to put hostname
+
+adduser —--------------  to add user
+
+Adding user to group
+
+Adduser username group i.e adduser coreyms sudo
+
+Creating ssh to login to pc without having to use the password
+
+From user station
+
+ssh-keygen  -b 4096
+
+To copy file from station my station to server we use scp stands for secure copy
+
+scp -r (recursive to mean moving whole directory) ~/.ssh/id_rsa.pub ubuntu@52.86.147.241:~/.shh/authorized_keys
+
+To change for read/write permissions
+
+Sudo chmod 700 ~/.ssh
+
+Sudo chmod 600 ~/ssh/*
+
+To access ssh installation
+
+Sudo /etc/ssh/sshd_config you can restrict root login through  disabling 
+
+PermitRootLogin no
+
+PasswordAuthentication no
+
+After making changes to ssh installation, you can restart through 
+
+Sudo systemctl restart sshd
+
+To install firewall on linux
+
+Sudo apt install ufw (uncomplicated firewall)
+
+
+Rules for the firewall
+
+Sudo ufw default allow outgoing
+
+Sudo ufw default deny incoming
+
+Sudo ufw allow ssh to allow for ssh
+
+Sudo ufw allow 5000 to allow port 5000
+
+Sudo ufw enable
+
+Sudo ufw status
+
+
+To use virtual env
+sudo apt install python3-pip
+sudo apt install python3-venv
+
+Commands used in virtual env
+
+pip freeze
+
+To create virtual inv with your app
+
+Python3  -m venv Agriconnect/venv
+
+To activate virtual environment
+ source venv/bin/activate
+
+To install all your requirements run
+
+pip install -r requirements.txt
+
+
+os.environ.get(‘---’) to set environment variable
+
+How to export an app to local variable
+export FLASK_APP=run.py
+
+flask run –host=0.0.0.0
+
+rm /etc/nginx/sites-enabled/default   – to remove default file
+
+Sudo ufw allow http/tcp
+
+Sudo ufw delete allow 5000
+
+Sudo ufw enable 
+
+Sudo systemctl restart nginx
+
+gunicorn -w 3 run:app
+
+
+3 from gunicorn above comes from (2* number of processor) +1
+
+Linux command for number of processors include nproc –all
+ Sudo apt install supervisor
+
+etc/supervisor/conf.d/agriconnect.conf
+
+Sudo mkdir -p /var/log/agriconnect
+
+touch  /var/log/agriconnect/agriconnect.err.log
+touch  /var/log/agriconnect/agriconnect.out.log
+
+Sudo supervisorctl reload
+
+etc/nginx/nginx.conf (client_max_body_size 5M) under types hash
+
+Systemctl restart nginx
+
+
+
+
