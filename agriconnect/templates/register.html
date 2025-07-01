@@ -1,8 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="row">
-    <div class="col-md-4"></div>
-    
+    <div class="col-md-4">
+        <div class="content-section">
+            <form method="POST" action="">
+                {{ register_type_form.hidden_tag() }}
+                <fieldset class="form-group mt-4 ml-4">
+                    <div class="form-group">
+                        {{ register_type_form.registration_type.label(class="form-control-label") }}
+
+                        {% if register_type_form.registration_type.errors %}
+                            {{ register_type_form.registration_type(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in register_type_form.registration_type.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ register_type_form.registration_type(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                </fieldset>
+                <div class="form-group">
+                    {{ register_type_form.submit(class="btn btn-outline-info btn-sm float-right") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if register_type == 'admin' %}
     <div class="col-md-4">
         <div class="content-section">
             <form method="POST" action="">
@@ -74,6 +99,7 @@
             </small>
         </div>
     </div>
+    {% endif %}
     <div class="col-md-4"></div>
 </div>
 {% endblock content %}

@@ -1,7 +1,8 @@
 # Import necessary libraries
 from flask import render_template, redirect, url_for, request, flash
 from agriconnect import app, bcrypt, db, mail
-from agriconnect.forms import LoginForm, ConfirmRegistration, RegistrationForm, SetResetPasswordForm
+from agriconnect.forms import (LoginForm, ConfirmRegistration, RegistrationForm, 
+SetResetPasswordForm, RegisterTypeForm)
 from agriconnect.models import User
 from flask_login import current_user, login_user, logout_user
 from flask_mail import Message
@@ -38,6 +39,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('portal'))
     form = RegistrationForm()
+    register_type_form = RegisterTypeForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
@@ -45,7 +47,10 @@ def register():
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    if register_type_form.validate_on_submit():
+        return redirect(url_for('register'))
+    return render_template('register.html', title='Register', form=form,
+    register_type=register_type_form.registration_type.data,register_type_form=register_type_form)
 
 # Route for dashboard after succeful login
 @app.route("/portal",methods = ['GET','POST'])

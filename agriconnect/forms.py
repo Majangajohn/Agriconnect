@@ -58,7 +58,7 @@ class SetResetPasswordForm(FlaskForm):
         if password.data ==  app.config['DEFAULT_PASSWORD']:
             raise ValidationError('You can not use default password again')
         
-class RegisterFarmer(FlaskForm):
+class RegisterFarmerForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email',
@@ -87,3 +87,10 @@ class RegisterFarmer(FlaskForm):
         farmer = Farmer.query.filter_by(contact=contact.data).first()
         if farmer:
             raise ValidationError('That email is taken. Please choose a different one.')
+
+class RegisterTypeForm(FlaskForm):
+    registration_type = SelectField('Choose Registration Type', 
+                                   choices=[('farmer', 'Farmer'), ('buyer', 'Buyer'), ('supplier', 'Supplier'), ('admin', 'Administrator')], 
+                                   validators=[DataRequired()])
+ 
+    submit = SubmitField('Choose Registration')
