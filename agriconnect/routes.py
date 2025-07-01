@@ -1,3 +1,4 @@
+# Import necessary libraries
 from flask import render_template, redirect, url_for, request, flash
 from agriconnect import app, bcrypt, db, mail
 from agriconnect.forms import LoginForm, ConfirmRegistration, RegistrationForm, SetResetPasswordForm
@@ -5,12 +6,13 @@ from agriconnect.models import User
 from flask_login import current_user, login_user, logout_user
 from flask_mail import Message
 
+# Route for home page
 @app.route("/")
 @app.route("/home")
 def home():
     return render_template('layout.html', title='Home')
 
-
+# Route for login page
 @app.route("/login", methods = ['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -30,6 +32,7 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form = form)
 
+# Route for register page
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -44,10 +47,12 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+# Route for dashboard after succeful login
 @app.route("/portal",methods = ['GET','POST'])
 def portal():
     return render_template('portal.html', title='Portal')
 
+# function for sending email
 def send_set_reset_email(user):
     token = user.get_set_reset_token()
     msg = Message('Password Set/Reset Request',
@@ -60,6 +65,7 @@ If you did not make this request then simply ignore this email and no changes wi
 '''
     mail.send(msg) 
 
+# Route for verrify registered user by sending activation link to your email
 @app.route("/confirm_registration",methods = ['GET','POST'])
 def confirm_registration():
     if current_user.is_authenticated:
@@ -72,6 +78,8 @@ def confirm_registration():
         return redirect(url_for('login'))
     return render_template('confirm_registration.html', title='Confirm Registration', form = form)
 
+
+# Route to set and reset you password
 @app.route("/set_reset_password/<token>", methods=['GET', 'POST'])
 def set_reset_token(token):
     if current_user.is_authenticated:
@@ -90,11 +98,14 @@ def set_reset_token(token):
         return redirect(url_for('login'))
     return render_template('set_reset_token.html', title='Set Reset Password', form=form)
 
+# Route for to logout
+
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# Route to about page
 @app.route("/about")
 def about():
      return render_template('about.html', title='About')
