@@ -50,8 +50,8 @@ class Farmer(db.Model):
     active = db.Column(db.String(1), nullable=False, default ='N')
     profile = db.Column(db.String(20), nullable=False, default='default.jpg')
     order = db.relationship('Soil_Composition',backref = 'soil_nutrients', lazy=True)
-    stocks = db.relationship('Stocks',backref = 'stocks', lazy=True)
-    orders = db.relationship('Order',backref = 'orders', lazy=True)
+    stocks = db.relationship('Stocks',backref = 'farmer_stocks', lazy=True)
+    orders = db.relationship('Order',backref = 'farmer_orders', lazy=True)
 
     def __repr__(self):
         return f"Farmer('{self.name}', '{self.email}', '{self.location}')"
@@ -74,13 +74,16 @@ class Supplier(db.Model):
     company_name = db.Column(db.String(100), unique=True, nullable = False)
     email = db.Column(db.String(120), unique = True, nullable = False)
     contact = db.Column(db.String(12), unique = True, nullable = False)
-    services = db.Column(db.String(120), unique = True, nullable = False)
+    county = db.Column(db.String(120),nullable=False)
+    country = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(120),nullable=False)
+    services = db.Column(db.String(120),nullable=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     logo = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False , default = 'Admin')
     active = db.Column(db.String(1), nullable=False, default ='N')
-    stocks = db.relationship('Stocks',backref = 'stocks', lazy=True)
-    orders = db.relationship('Order',backref = 'orders', lazy=True)
+    stocks = db.relationship('Stocks',backref = 'supplier_stocks', lazy=True)
+    orders = db.relationship('Order',backref = 'supplier_orders', lazy=True)
 
     def __repr__(self):
         return f"Supplier('{self.company_name}', '{self.email}', '{self.contact}')"

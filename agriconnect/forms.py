@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField,FloatField,SelectField
 from wtforms.validators import DataRequired, Email, ValidationError, Length, EqualTo,Regexp
-from agriconnect.models import User, Farmer
+from agriconnect.models import User, Farmer, Supplier
 from agriconnect import app
 
         
@@ -69,8 +69,6 @@ class RegisterFarmerForm(FlaskForm):
                          validators=[DataRequired(), Length(max=120)])
     country = StringField('Country', 
                           validators=[DataRequired(), Length(max=120)])
-    location = StringField('Location', 
-                           validators=[DataRequired(), Length(max=120)])
     land_size = FloatField('Land Size', 
                            validators=[DataRequired()])
     soil_composition = SelectField('Soil Composition', 
@@ -83,6 +81,7 @@ class RegisterFarmerForm(FlaskForm):
         farmer = Farmer.query.filter_by(email=email.data).first()
         if farmer:
             raise ValidationError('That username is taken. Please choose a different one')
+
     def validate_contact(self, contact):
         farmer = Farmer.query.filter_by(contact=contact.data).first()
         if farmer:
@@ -94,3 +93,29 @@ class RegisterTypeForm(FlaskForm):
                                    validators=[DataRequired()])
  
     submit = SubmitField('Choose Registration')
+
+class RegisterSupplierForm(FlaskForm):
+    company = StringField('Company Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    contact = StringField('Contact', 
+                          validators=[DataRequired(), Length(min=10, max=12), Regexp(r'^\d+$', message='Must be numeric')])
+    county = StringField('County', 
+                         validators=[DataRequired(), Length(max=120)])
+    country = StringField('Country', 
+                          validators=[DataRequired(), Length(max=120)])
+    services = StringField('Services', 
+                          validators=[DataRequired(), Length(max=120)])
+ 
+    submit = SubmitField('Register Supplier')
+
+    def validate_email(self, email):
+        supplier = Supplier.query.filter_by(email=email.data).first()
+        if supplier:
+            raise ValidationError('That username is taken. Please choose a different one')
+
+    def validate_contact(self, company):
+        supplier = Supplier.query.filter_by(company=company.data).first()
+        if supplier:
+            raise ValidationError('That email is taken. Please choose a different one.')
