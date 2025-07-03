@@ -53,6 +53,19 @@ class Farmer(db.Model):
     stocks = db.relationship('Stocks',backref = 'farmer_stocks', lazy=True)
     orders = db.relationship('Order',backref = 'farmer_orders', lazy=True)
 
+    def get_set_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+    
+    @staticmethod
+    def verify_set_reset_token(token, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, expires_sec)['user_id']
+        except:
+            return None
+        return Farmer.query.get(user_id)
+
     def __repr__(self):
         return f"Farmer('{self.name}', '{self.email}', '{self.location}')"
     
@@ -85,6 +98,19 @@ class Supplier(db.Model):
     stocks = db.relationship('Stocks',backref = 'supplier_stocks', lazy=True)
     orders = db.relationship('Order',backref = 'supplier_orders', lazy=True)
 
+    def get_set_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+    
+    @staticmethod
+    def verify_set_reset_token(token, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, expires_sec)['user_id']
+        except:
+            return None
+        return Supplier.query.get(user_id)
+
     def __repr__(self):
         return f"Supplier('{self.company_name}', '{self.email}', '{self.contact}')"
     
@@ -114,6 +140,19 @@ class Buyer(db.Model):
     logo = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False , default = 'Admin')
     active = db.Column(db.String(1), nullable=False, default ='N')
+
+    def get_set_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+    
+    @staticmethod
+    def verify_set_reset_token(token, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, expires_sec)['user_id']
+        except:
+            return None
+        return Buyer.query.get(user_id)
 
     def __repr__(self):
         return f"Buyer('{self.company_name}', '{self.email}', '{self.contact}')"

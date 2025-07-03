@@ -28,11 +28,11 @@ def login():
         buyer = Buyer.query.filter_by(email=form.email.data).first()
         level = form.registration_type.data
         if level == 'admin' :
-            if user and form.password.data == app.config['DEFAULT_PASSWORD'] and user.active == 'N' :
-                return redirect(url_for('confirm_registration'))
+            if user and form.password.data == app.config['DEFAULT_PASSWORD'] :
+                return redirect(url_for('confirm_registration',level_type = level))
 
             elif user and form.password.data != app.config['DEFAULT_PASSWORD'] and\
-            bcrypt.check_password_hash(user.password, form.password.data) and user.active == 'Y' :
+            bcrypt.check_password_hash(user.password, form.password.data) :
                 login_user(user, remember=form.remember.data)
                 next_page = request.args.get('next')
                 return redirect(next_page) if next_page else redirect(url_for('portal'))
@@ -40,7 +40,7 @@ def login():
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'farmer' :
             if farmer and form.password.data == app.config['DEFAULT_PASSWORD'] :
-                return redirect(url_for('confirm_registration'))
+                return redirect(url_for('confirm_registration',level_type = level))
 
             elif farmer and form.password.data != app.config['DEFAULT_PASSWORD'] and\
             bcrypt.check_password_hash(farmer.password, form.password.data) :
@@ -51,7 +51,7 @@ def login():
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'supplier' :
             if supplier and form.password.data == app.config['DEFAULT_PASSWORD'] :
-                return redirect(url_for('confirm_registration'))
+                return redirect(url_for('confirm_registration',level_type = level))
 
             elif supplier and form.password.data != app.config['DEFAULT_PASSWORD'] and\
             bcrypt.check_password_hash(supplier.password, form.password.data) :
@@ -62,7 +62,7 @@ def login():
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'buyer' :
             if buyer and form.password.data == app.config['DEFAULT_PASSWORD'] :
-                return redirect(url_for('confirm_registration'))
+                return redirect(url_for('confirm_registration',level_type = level))
 
             elif buyer and form.password.data != app.config['DEFAULT_PASSWORD'] and\
             bcrypt.check_password_hash(buyer.password, form.password.data) :
@@ -162,46 +162,79 @@ def portal():
     return render_template('portal.html', title='Portal')
 
 # function for sending email
-def send_set_reset_email(user):
+def send_set_reset_email(user, level):
+
+    user_level = level
     token = user.get_set_reset_token()
+     
     msg = Message('Password Set/Reset Request',
                   sender='jnmajanga@gmail.com',
                   recipients=[user.email])
     msg.body = f'''To set/reset your password, visit the following link:
-{url_for('set_reset_token', token=token, _external=True)}
+    {url_for('set_reset_token', user_level = user_level,token=token, _external=True)}
 
-If you did not make this request then simply ignore this email and no changes will be made.
-'''
+    If you did not make this request then simply ignore this email and no changes will be made.
+    '''
     mail.send(msg) 
 
 # Route for verrify registered user by sending activation link to your email
-@app.route("/confirm_registration",methods = ['GET','POST'])
-def confirm_registration():
+@app.route("/confirm_registration/<string:level_type>",methods = ['GET','POST'])
+def confirm_registration(level_type):
     if current_user.is_authenticated:
         return redirect(url_for('portal'))
+
     form = ConfirmRegistration()
+
+    level_type = level_type
+
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        send_set_reset_email(user)
+        if level_type == 'admin' :
+            admin = User.query.filter_by(email=form.email.data).first()
+            send_set_reset_email(admin, level_type)
+        elif level_type == 'farmer' :
+            farmer = Farmer.query.filter_by(email=form.email.data).first()
+            send_set_reset_email(farmer, level_type)
+        elif level_type == 'buyer' :
+            buyer = Buyer.query.filter_by(email=form.email.data).first()
+            send_set_reset_email(buyer, level_type)
+        elif level_type == 'supplier' :
+            supplier = Supplier.query.filter_by(email=form.email.data).first()
+            send_set_reset_email(supplier, level_type)
+        else:
+            flash('Invalid request.', 'info')
+
         flash('An email has been sent with instructions to set/reset your password.', 'info')
         return redirect(url_for('login'))
     return render_template('confirm_registration.html', title='Confirm Registration', form = form)
 
 
 # Route to set and reset you password
-@app.route("/set_reset_password/<token>", methods=['GET', 'POST'])
-def set_reset_token(token):
+@app.route("/set_reset_password/<string: user_level>/<token>", methods=['GET', 'POST'])
+def set_reset_token(user_level,token):
     if current_user.is_authenticated:
         return redirect(url_for('portal'))
-    user = User.verify_set_reset_token(token)
+
+    user_level = user_level
+
+    if user_level = 'admin' :
+        user = User.verify_set_reset_token(token)
+    elif user_level = 'farmer' :
+        user = Farmer.verify_set_reset_token(token)
+    elif user_level = 'supplier' :
+        user = Supplier.verify_set_reset_token(token)
+    elif user_level = 'buyer' :
+        user = Buyer.verify_set_reset_token(token)
+
     if user is None:
         flash('That is an invalid or expired token', 'warning')
         return redirect(url_for('confirm_registration'))
+
     form = SetResetPasswordForm()
+
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user.password = hashed_password
-        user.active = 'Y'
+        #user.active = 'Y'
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('login'))
