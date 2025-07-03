@@ -2,8 +2,8 @@
 from flask import render_template, redirect, url_for, request, flash
 from agriconnect import app, bcrypt, db, mail
 from agriconnect.forms import (LoginForm, ConfirmRegistration, RegistrationForm, 
-SetResetPasswordForm, RegisterTypeForm,RegisterFarmerForm, RegisterSupplierForm)
-from agriconnect.models import User, Farmer,Supplier
+SetResetPasswordForm, RegisterTypeForm,RegisterFarmerForm, RegisterSupplierForm, RegisterBuyerForm)
+from agriconnect.models import User, Farmer,Supplier, Buyer
 from flask_login import current_user, login_user, logout_user
 from flask_mail import Message
 
@@ -20,17 +20,60 @@ def login():
         return redirect(url_for('portal'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and form.password.data == app.config['DEFAULT_PASSWORD'] and user.active == 'N' :
-            return redirect(url_for('confirm_registration'))
 
-        elif user and form.password.data != app.config['DEFAULT_PASSWORD'] and\
-        bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('portal'))
+        #Listing different tables for different level of access
+        user = User.query.filter_by(email=form.email.data).first()
+        farmer = Farmer.query.filter_by(email=form.email.data).first()
+        supplier = Supplier.query.filter_by(email=form.email.data).first()
+        buyer = Buyer.query.filter_by(email=form.email.data).first()
+        level = form.registration_type.data
+        if level == 'admin' :
+            if user and form.password.data == app.config['DEFAULT_PASSWORD'] and user.active == 'N' :
+                return redirect(url_for('confirm_registration'))
+
+            elif user and form.password.data != app.config['DEFAULT_PASSWORD'] and\
+            bcrypt.check_password_hash(user.password, form.password.data) and user.active == 'Y' :
+                login_user(user, remember=form.remember.data)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('portal'))
+            else:
+                flash('Login Unsuccessful. Please check email and password', 'danger')
+        elif level == 'farmer' :
+            if farmer and form.password.data == app.config['DEFAULT_PASSWORD'] :
+                return redirect(url_for('confirm_registration'))
+
+            elif farmer and form.password.data != app.config['DEFAULT_PASSWORD'] and\
+            bcrypt.check_password_hash(farmer.password, form.password.data) :
+                login_user(farmer, remember=form.remember.data)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('portal'))
+            else:
+                flash('Login Unsuccessful. Please check email and password', 'danger')
+        elif level == 'supplier' :
+            if supplier and form.password.data == app.config['DEFAULT_PASSWORD'] :
+                return redirect(url_for('confirm_registration'))
+
+            elif supplier and form.password.data != app.config['DEFAULT_PASSWORD'] and\
+            bcrypt.check_password_hash(supplier.password, form.password.data) :
+                login_user(supplier, remember=form.remember.data)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('portal'))
+            else:
+                flash('Login Unsuccessful. Please check email and password', 'danger')
+        elif level == 'buyer' :
+            if buyer and form.password.data == app.config['DEFAULT_PASSWORD'] :
+                return redirect(url_for('confirm_registration'))
+
+            elif buyer and form.password.data != app.config['DEFAULT_PASSWORD'] and\
+            bcrypt.check_password_hash(buyer.password, form.password.data) :
+                login_user(buyer, remember=form.remember.data)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('portal'))
+            else:
+                flash('Login Unsuccessful. Please check email and password', 'danger')
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
+
     return render_template('login.html', title='Login', form = form)
 
 # Route for register page
@@ -78,12 +121,25 @@ def register():
 
     if supplier_form.validate_on_submit() and supplier_form.submit.data:
         # hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        supplier = Supplier(company=supplier_form.company.data, email=supplier_form.email.data,contact=supplier_form.contact.data,
+        supplier = Supplier(company_name=supplier_form.company.data, email=supplier_form.email.data,contact=supplier_form.contact.data,
                       county=supplier_form.county.data,country=supplier_form.country.data,location=supplier_form.county.data+","+supplier_form.country.data,
                       services=supplier_form.services.data)
         db.session.add(supplier)
         db.session.commit()
         flash(f'Supplier {supplier_form.company.data} has been successfully registered! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    
+    # Step 5: Show registration form based on selected type (e.g., Buyer)
+    buyer_form = RegisterBuyerForm()
+
+    if buyer_form.validate_on_submit() and buyer_form.submit.data:
+        # hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        buyer = Buyer(company_name=buyer_form.company.data, email=buyer_form.email.data,contact=buyer_form.contact.data,
+                      county=buyer_form.county.data,country=buyer_form.country.data,location=buyer_form.county.data+","+buyer_form.country.data
+                      )
+        db.session.add(buyer)
+        db.session.commit()
+        flash(f'Buyer {buyer_form.company.data} has been successfully registered! You are now able to log in', 'success')
         return redirect(url_for('login'))
     
 
@@ -95,7 +151,9 @@ def register():
                            register_type_form=register_type_form,
                            register_type=register_type,
                            farmer_form = farmer_form,
-                           supplier_form = supplier_form)
+                           supplier_form = supplier_form,
+                           buyer_form = buyer_form
+                           )
 
 
 # Route for dashboard after succeful login

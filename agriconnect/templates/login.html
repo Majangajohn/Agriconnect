@@ -61,6 +61,20 @@
                                         {{ form.password(class="form-control form-control-lg") }}
                                     {% endif %}
                                 </div>
+                                <div class="form-group">
+                                    {{ form.registration_type.label(class="form-control-label") }}
+
+                                    {% if form.registration_type.errors %}
+                                        {{ form.registration_type(class="form-control form-control-lg is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.registration_type.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.registration_type(class="form-control form-control-lg") }}
+                                    {% endif %}
+                                </div>
                                 <div class="form-check">
                                     {{ form.remember(class="form-check-input") }}
                                     {{ form.remember.label(class="form-check-label") }}

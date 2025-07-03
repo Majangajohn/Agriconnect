@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField,FloatField,SelectField
 from wtforms.validators import DataRequired, Email, ValidationError, Length, EqualTo,Regexp
-from agriconnect.models import User, Farmer, Supplier
+from agriconnect.models import User, Farmer, Supplier, Buyer
 from agriconnect import app
 
         
@@ -10,6 +10,9 @@ class LoginForm(FlaskForm):
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
+    registration_type = SelectField('Choose Login Type', 
+                                   choices=[('farmer', 'Farmer'), ('buyer', 'Buyer'), ('supplier', 'Supplier'), ('admin', 'Administrator')], 
+                                   validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
@@ -80,12 +83,12 @@ class RegisterFarmerForm(FlaskForm):
     def validate_email(self, email):
         farmer = Farmer.query.filter_by(email=email.data).first()
         if farmer:
-            raise ValidationError('That username is taken. Please choose a different one')
+            raise ValidationError('The email already exists.')
 
     def validate_contact(self, contact):
         farmer = Farmer.query.filter_by(contact=contact.data).first()
         if farmer:
-            raise ValidationError('That email is taken. Please choose a different one.')
+            raise ValidationError('The contact already exists.')
 
 class RegisterTypeForm(FlaskForm):
     registration_type = SelectField('Choose Registration Type', 
@@ -113,9 +116,42 @@ class RegisterSupplierForm(FlaskForm):
     def validate_email(self, email):
         supplier = Supplier.query.filter_by(email=email.data).first()
         if supplier:
-            raise ValidationError('That username is taken. Please choose a different one')
+            raise ValidationError('The email already exists.')
 
     def validate_contact(self, company):
-        supplier = Supplier.query.filter_by(company=company.data).first()
+        supplier = Supplier.query.filter_by(company_name=company.data).first()
         if supplier:
-            raise ValidationError('That email is taken. Please choose a different one.')
+            raise ValidationError(f'The company {company.data} is already registered as Supplier.')
+    def validate_contact(self, contact):
+        supplier = Supplier.query.filter_by(contact=contact.data).first()
+        if supplier:
+            raise ValidationError('The contact already exists.')
+        
+class RegisterBuyerForm(FlaskForm):
+    company = StringField('Company Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    contact = StringField('Contact', 
+                          validators=[DataRequired(), Length(min=10, max=12), Regexp(r'^\d+$', message='Must be numeric')])
+    county = StringField('County', 
+                         validators=[DataRequired(), Length(max=120)])
+    country = StringField('Country', 
+                          validators=[DataRequired(), Length(max=120)])
+ 
+    submit = SubmitField('Register Buyer')
+
+    def validate_email(self, email):
+        buyer = Buyer.query.filter_by(email=email.data).first()
+        if buyer:
+            raise ValidationError('The email already exists.')
+
+    def validate_contact(self, company):
+        buyer = Buyer.query.filter_by(company_name=company.data).first()
+        if buyer:
+            raise ValidationError(f'The company {company.data} is already registered as Buyer.')
+        
+    def validate_contact(self, contact):
+        buyer = Buyer.query.filter_by(contact=contact.data).first()
+        if buyer:
+            raise ValidationError('The contact already exists.')
