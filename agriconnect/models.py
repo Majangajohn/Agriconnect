@@ -7,7 +7,24 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    # Try loading from each model based on ID
+    try:
+        user_id = int(user_id)
+        user = User.query.get(user_id)
+        if user:
+            return user
+        farmer = Farmer.query.get(user_id)
+        if farmer:
+            return farmer
+        supplier = Supplier.query.get(user_id)
+        if supplier:
+            return supplier
+        buyer = Buyer.query.get(user_id)
+        if buyer:
+            return buyer
+    except:
+        return None
+    return None
 
 
 class User(db.Model, UserMixin):
@@ -19,7 +36,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False , default = 'Admin')
     active = db.Column(db.String(1), nullable=False, default ='N')
     
-    def get_set_reset_token(self, expires_sec=1800):
+    def get_set_reset_token(self):
         s = Serializer(app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
     
@@ -35,7 +52,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
     
-class Farmer(db.Model):
+class Farmer(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False) 
     email = db.Column(db.String(120), unique=True)
@@ -53,7 +70,7 @@ class Farmer(db.Model):
     stocks = db.relationship('Stocks',backref = 'farmer_stocks', lazy=True)
     orders = db.relationship('Order',backref = 'farmer_orders', lazy=True)
 
-    def get_set_reset_token(self, expires_sec=1800):
+    def get_set_reset_token(self):
         s = Serializer(app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
     
@@ -82,7 +99,7 @@ class Soil_Composition(db.Model):
     def __repr__(self):
         return f"Soil_Composition('{self.ph_level}', '{self.nitrogen}', '{self.potassium}')"
 
-class Supplier(db.Model):
+class Supplier(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(100), unique=True, nullable = False)
     email = db.Column(db.String(120), unique = True, nullable = False)
@@ -98,7 +115,7 @@ class Supplier(db.Model):
     stocks = db.relationship('Stocks',backref = 'supplier_stocks', lazy=True)
     orders = db.relationship('Order',backref = 'supplier_orders', lazy=True)
 
-    def get_set_reset_token(self, expires_sec=1800):
+    def get_set_reset_token(self):
         s = Serializer(app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
     
@@ -128,7 +145,7 @@ class Stocks(db.Model):
     def __repr__(self):
         return f"Order('{self.product_details}', '{self.status}', '{self.create_date}')"
 
-class Buyer(db.Model):
+class Buyer(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(100), nullable = False, unique = True)
     email = db.Column(db.String(100), unique = True, nullable = False)
@@ -141,7 +158,7 @@ class Buyer(db.Model):
     password = db.Column(db.String(60), nullable=False , default = 'Admin')
     active = db.Column(db.String(1), nullable=False, default ='N')
 
-    def get_set_reset_token(self, expires_sec=1800):
+    def get_set_reset_token(self):
         s = Serializer(app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
     

@@ -16,19 +16,32 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is None:
-            raise ValidationError('There is no account with that email. You must first register with Ministry of Agriculture.')
+    if registration_type == 'admin' :
+        def validate_email(self, email):
+            user = User.query.filter_by(email=email.data).first()
+            if user is None:
+                raise ValidationError('There is no account with that email. You must first register with Ministry of Agriculture.')
+    if registration_type == 'farmer' :
+        def validate_email(self, email):
+            farmer = Farmer.query.filter_by(email=email.data).first()
+            if farmer is None:
+                raise ValidationError('There is no account with that email. You must first register with Ministry of Agriculture.')
+    if registration_type == 'supplier' :
+        def validate_email(self, email):
+            supplier = Supplier.query.filter_by(email=email.data).first()
+            if supplier is None:
+                raise ValidationError('There is no account with that email. You must first register with Ministry of Agriculture.') 
+    if registration_type == 'buyer' :
+        def validate_email(self, email):
+            buyer = Buyer.query.filter_by(email=email.data).first()
+            if buyer is None:
+                raise ValidationError('There is no account with that email. You must first register with Ministry of Agriculture.')
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password',
-                                     validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -46,10 +59,29 @@ class ConfirmRegistration(FlaskForm):
                         validators=[DataRequired(), Email()])
     submit = SubmitField('Confirm Email Registration')
 
+    def __init__(self, level_type=None, *args, **kwargs):
+        super(ConfirmRegistration, self).__init__(*args, **kwargs)
+        self.level_type = level_type
+
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is None:
-            raise ValidationError('There is no account with that email. You must register first.')
+        if self.level_type == 'admin':
+            user = User.query.filter_by(email=email.data).first()
+            if user is None:
+                raise ValidationError('There is no account with that email. You must register first.')
+        elif self.level_type == 'farmer':
+            farmer = Farmer.query.filter_by(email=email.data).first()
+            if farmer is None:
+                raise ValidationError('There is no account with that email. You must register first.')
+        elif self.level_type == 'supplier':
+            supplier = Supplier.query.filter_by(email=email.data).first()
+            if supplier is None:
+                raise ValidationError('There is no account with that email. You must register first.')
+        elif self.level_type == 'buyer':
+            buyer = Buyer.query.filter_by(email=email.data).first()
+            if buyer is None:
+                raise ValidationError('There is no account with that email. You must register first.')
+        else:
+            raise ValidationError('Invalid registration type.')
 
 class SetResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])

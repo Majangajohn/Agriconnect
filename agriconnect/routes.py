@@ -4,7 +4,7 @@ from agriconnect import app, bcrypt, db, mail
 from agriconnect.forms import (LoginForm, ConfirmRegistration, RegistrationForm, 
 SetResetPasswordForm, RegisterTypeForm,RegisterFarmerForm, RegisterSupplierForm, RegisterBuyerForm)
 from agriconnect.models import User, Farmer,Supplier, Buyer
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
 
 # Route for home page
@@ -22,14 +22,12 @@ def login():
     if form.validate_on_submit():
 
         #Listing different tables for different level of access
-        user = User.query.filter_by(email=form.email.data).first()
-        farmer = Farmer.query.filter_by(email=form.email.data).first()
-        supplier = Supplier.query.filter_by(email=form.email.data).first()
-        buyer = Buyer.query.filter_by(email=form.email.data).first()
         level = form.registration_type.data
+
         if level == 'admin' :
+            user = User.query.filter_by(email=form.email.data).first()
             if user and form.password.data == app.config['DEFAULT_PASSWORD'] :
-                return redirect(url_for('confirm_registration',level_type = level))
+                return redirect(url_for('confirm_registration',level_type=level))
 
             elif user and form.password.data != app.config['DEFAULT_PASSWORD'] and\
             bcrypt.check_password_hash(user.password, form.password.data) :
@@ -39,6 +37,7 @@ def login():
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'farmer' :
+            farmer = Farmer.query.filter_by(email=form.email.data).first()
             if farmer and form.password.data == app.config['DEFAULT_PASSWORD'] :
                 return redirect(url_for('confirm_registration',level_type = level))
 
@@ -50,6 +49,7 @@ def login():
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'supplier' :
+            supplier = Supplier.query.filter_by(email=form.email.data).first()
             if supplier and form.password.data == app.config['DEFAULT_PASSWORD'] :
                 return redirect(url_for('confirm_registration',level_type = level))
 
@@ -61,6 +61,7 @@ def login():
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'buyer' :
+            buyer = Buyer.query.filter_by(email=form.email.data).first()
             if buyer and form.password.data == app.config['DEFAULT_PASSWORD'] :
                 return redirect(url_for('confirm_registration',level_type = level))
 
@@ -96,8 +97,7 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit() and form.submit.data:
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        user = User(username=form.username.data, email=form.email.data)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
@@ -158,6 +158,7 @@ def register():
 
 # Route for dashboard after succeful login
 @app.route("/portal",methods = ['GET','POST'])
+@login_required
 def portal():
     return render_template('portal.html', title='Portal')
 
@@ -167,11 +168,11 @@ def send_set_reset_email(user, level):
     user_level = level
     token = user.get_set_reset_token()
      
-    msg = Message('Password Set/Reset Request',
+    msg = Message('Agriconnect Password Set/Reset Request',
                   sender='jnmajanga@gmail.com',
                   recipients=[user.email])
     msg.body = f'''To set/reset your password, visit the following link:
-    {url_for('set_reset_token', user_level = user_level,token=token, _external=True)}
+    {url_for('set_reset_token',user_level=user_level,token=token,_external=True)}
 
     If you did not make this request then simply ignore this email and no changes will be made.
     '''
@@ -183,11 +184,12 @@ def confirm_registration(level_type):
     if current_user.is_authenticated:
         return redirect(url_for('portal'))
 
-    form = ConfirmRegistration()
+    form = ConfirmRegistration(level_type=level_type)
 
-    level_type = level_type
+    level = level_type
 
     if form.validate_on_submit():
+
         if level_type == 'admin' :
             admin = User.query.filter_by(email=form.email.data).first()
             send_set_reset_email(admin, level_type)
@@ -202,32 +204,37 @@ def confirm_registration(level_type):
             send_set_reset_email(supplier, level_type)
         else:
             flash('Invalid request.', 'info')
-
+            return redirect(url_for('confirm_registration',level_type=level))
+        
         flash('An email has been sent with instructions to set/reset your password.', 'info')
         return redirect(url_for('login'))
     return render_template('confirm_registration.html', title='Confirm Registration', form = form)
 
 
 # Route to set and reset you password
-@app.route("/set_reset_password/<string: user_level>/<token>", methods=['GET', 'POST'])
+@app.route("/set_reset_password/<string:user_level>/<token>", methods=['GET', 'POST'])
 def set_reset_token(user_level,token):
     if current_user.is_authenticated:
         return redirect(url_for('portal'))
 
     user_level = user_level
+    token = token
 
-    if user_level = 'admin' :
+    if user_level == 'admin' :
         user = User.verify_set_reset_token(token)
-    elif user_level = 'farmer' :
+    elif user_level == 'farmer' :
         user = Farmer.verify_set_reset_token(token)
-    elif user_level = 'supplier' :
+    elif user_level == 'supplier' :
         user = Supplier.verify_set_reset_token(token)
-    elif user_level = 'buyer' :
+    elif user_level == 'buyer' :
         user = Buyer.verify_set_reset_token(token)
+    else:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('confirm_registration',level_type=user_level))
 
     if user is None:
         flash('That is an invalid or expired token', 'warning')
-        return redirect(url_for('confirm_registration'))
+        return redirect(url_for('confirm_registration',level_type=user_level))
 
     form = SetResetPasswordForm()
 
@@ -238,6 +245,7 @@ def set_reset_token(user_level,token):
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('login'))
+    
     return render_template('set_reset_token.html', title='Set Reset Password', form=form)
 
 # Route for to logout
@@ -251,3 +259,18 @@ def logout():
 @app.route("/about")
 def about():
      return render_template('about.html', title='About')
+
+# Route to reset password
+
+@app.route("/reset_password",methods=['GET', 'POST'])
+def reset_password():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('portal'))
+    
+    reset_password_form = RegisterTypeForm()
+
+    if reset_password_form.validate_on_submit():
+        return redirect(url_for('confirm_registration',level_type = reset_password_form.registration_type.data))
+
+    return render_template('reset_password.html', title='Reset Password Form',form = reset_password_form)
