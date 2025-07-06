@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnect - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#4F4FC7',
+                        dark: {
+                            bg: '#181818',
+                            card: '#252525',
+                            text: '#E5E5E5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .badge-animate {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .sortable:hover {
+            cursor: pointer;
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .dark .modal-content {
+            background: #252525;
+        }
+        
+        .pagination-btn {
+            padding: 6px 12px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .dark .pagination-btn {
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #e5e7eb;
+        }
+        
+        .dark .pagination-btn:hover:not(:disabled) {
+            background-color: #4b5563;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-dark-text transition-colors duration-200">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-dark-card shadow-sm">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-leaf text-2xl text-green-500 mr-2"></i>
+                    <h1 class="text-xl md:text-2xl font-bold">AgriConnect Admin</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="notificationBtn" class="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span id="notificationBadge" class="hidden badge-animate absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    </button>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center focus:outline-none">
+                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span id="userInitials">AD</span>
+                            </div>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card rounded-md shadow-lg z-10">
+                            <div class="py-1">
+                                <button id="toggleDarkMode" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Toggle Dark Mode</button>
+                                <button class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</button>
+                                <button class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Dashboard -->
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Sidebar Navigation -->
+                <div class="w-full md:w-1/4 lg:w-1/5">
+                    <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-4">
+                        <nav>
+                            <ul class="space-y-1">
+                                <li>
+                                    <button data-view="dashboard" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left bg-primary bg-opacity-10 text-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        <span>Dashboard</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="users" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                        </svg>
+                                        <span>User Management</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="orders" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        <span>Order Monitoring</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="analytics" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        <span>System Analytics</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="finance" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>Financial Reports</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="settings" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span>System Settings</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="w-full md:w-3/4 lg:w-4/5">
+                    <!-- Dashboard View -->
+                    <div id="dashboard-view" class="view-content">
+                        <!-- Welcome Section -->
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 mb-6">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h2 class="text-2xl font-bold mb-2">Welcome, Administrator!</h2>
+                                    <p class="text-gray-600 dark:text-gray-400">System overview and monitoring dashboard</p>
+                                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="totalUsers">245</div>
+                                            <div class="text-sm text-gray-500">Total Users</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="activeOrders">89</div>
+                                            <div class="text-sm text-gray-500">Active Orders</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="totalRevenue">Ksh 1,254,800</div>
+                                            <div class="text-sm text-gray-500">Monthly Revenue</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-orange-600 dark:text-orange-400" id="systemHealth">98.5%</div>
+                                            <div class="text-sm text-gray-500">System Uptime</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hidden sm:block">
+                                    <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Farmers</p>
+                                        <h3 class="text-2xl font-bold mt-1">156</h3>
+                                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">↑ 12% this month</p>
+                                    </div>
+                                    <div class="bg-green-100 dark:bg-green-900 dark:bg-opacity-20 p-3 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h.5A2.5 2.5 0 0020 5.5v-1.5" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Suppliers</p>
+                                        <h3 class="text-2xl font-bold mt-1">58</h3>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">↑ 8% this month</p>
+                                    </div>
+                                    <div class="bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Buyers</p>
+                                        <h3 class="text-2xl font-bold mt-1">31</h3>
+                                        <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">↑ 15% this month</p>
+                                    </div>
+                                    <div class="bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 p-3 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Platform Issues</p>
+                                        <h3 class="text-2xl font-bold mt-1">3</h3>
+                                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">↓ 2 resolved today</p>
+                                    </div>
+                                    <div class="bg-red-100 dark:bg-red-900 dark:bg-opacity-20 p-3 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Section -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <!-- User Growth Chart -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-semibold mb-4">User Growth Trends</h3>
+                                <div class="h-64 flex items-end relative">
+                                    <div class="absolute bottom-0 left-0 right-0 h-px bg-gray-200 dark:bg-gray-700"></div>
+                                    <div class="absolute left-0 bottom-0 top-0 w-px bg-gray-200 dark:bg-gray-700"></div>
+                                    
+                                    <svg class="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
+                                        <!-- Farmers line -->
+                                        <polyline
+                                            points="0,150 50,140 100,130 150,120 200,110 250,100 300,85 350,75 400,70"
+                                            fill="none"
+                                            stroke="#10B981"
+                                            stroke-width="3"
+                                        />
+                                        <!-- Suppliers line -->
+                                        <polyline
+                                            points="0,170 50,165 100,160 150,155 200,145 250,140 300,135 350,130 400,125"
+                                            fill="none"
+                                            stroke="#3B82F6"
+                                            stroke-width="3"
+                                        />
+                                        <!-- Buyers line -->
+                                        <polyline
+                                            points="0,180 50,178 100,175 150,170 200,165 250,160 300,150 350,140 400,130"
+                                            fill="none"
+                                            stroke="#8B5CF6"
+                                            stroke-width="3"
+                                        />
+                                    </svg>
+                                    
+                                    <div class="absolute bottom-0 w-full flex justify-between px-4 text-xs text-gray-500 dark:text-gray-400">
+                                        <div>Jan</div>
+                                        <div>Mar</div>
+                                        <div>May</div>
+                                        <div>Jul</div>
+                                        <div>Sep</div>
+                                        <div>Nov</div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-center space-x-6 mt-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                        <span class="text-sm">Farmers</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                        <span class="text-sm">Suppliers</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                                        <span class="text-sm">Buyers</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Revenue Chart -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-semibold mb-4">Monthly Revenue</h3>
+                                <div class="h-64 flex items-end justify-around gap-2">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-primary rounded-t-md" style="height: 45%"></div>
+                                        <span class="text-xs mt-2">Jan</span>
+                                        <span class="text-xs text-gray-500">Ksh 890K</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-primary rounded-t-md" style="height: 55%"></div>
+                                        <span class="text-xs mt-2">Feb</span>
+                                        <span class="text-xs text-gray-500">Ksh 950K</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-primary rounded-t-md" style="height: 70%"></div>
+                                        <span class="text-xs mt-2">Mar</span>
+                                        <span class="text-xs text-gray-500">Ksh 1.08M</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-primary rounded-t-md" style="height: 65%"></div>
+                                        <span class="text-xs mt-2">Apr</span>
+                                        <span class="text-xs text-gray-500">Ksh 1.02M</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-primary rounded-t-md" style="height: 80%"></div>
+                                        <span class="text-xs mt-2">May</span>
+                                        <span class="text-xs text-gray-500">Ksh 1.25M</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-8 bg-gray-300 dark:bg-gray-600 rounded-t-md" style="height: 30%"></div>
+                                        <span class="text-xs mt-2">Jun</span>
+                                        <span class="text-xs text-gray-500">Est. Ksh 950K</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity & System Alerts -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Recent System Activity -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-semibold mb-4">Recent System Activity</h3>
+                                <div class="space-y-4" id="adminActivityFeed">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                                        <div class="flex-1">
+                                            <p class="text-sm">New farmer registration: <span class="font-medium">Michael Thompson</span></p>
+                                            <p class="text-xs text-gray-500">2 minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                        <div class="flex-1">
+                                            <p class="text-sm">Large order placed: <span class="font-medium">Ksh 245,000 by AgriCorp Ltd</span></p>
+                                            <p class="text-xs text-gray-500">15 minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                                        <div class="flex-1">
+                                            <p class="text-sm">Payment processing delay: <span class="font-medium">Order #ORD-89453</span></p>
+                                            <p class="text-xs text-gray-500">1 hour ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                                        <div class="flex-1">
+                                            <p class="text-sm">System maintenance completed: <span class="font-medium">Database optimization</span></p>
+                                            <p class="text-xs text-gray-500">3 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Alerts -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-semibold mb-4">System Alerts</h3>
+                                <div class="space-y-4">
+                                    <div class="border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-4">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="font-medium text-yellow-800 dark:text-yellow-200">Server Load High</h4>
+                                                <p class="text-sm text-yellow-700 dark:text-yellow-300">CPU usage at 78%</p>
+                                            </div>
+                                            <span class="text-xs text-yellow-600 dark:text-yellow-400">Active</span>
+                                        </div>
+                                    </div>
+                                    <div class="border-l-4 border-blue-400 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-4">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="font-medium text-blue-800 dark:text-blue-200">Scheduled Maintenance</h4>
+                                                <p class="text-sm text-blue-700 dark:text-blue-300">Database backup at 2:00 AM</p>
+                                            </div>
+                                            <span class="text-xs text-blue-600 dark:text-blue-400">Upcoming</span>
+                                        </div>
+                                    </div>
+                                    <div class="border-l-4 border-green-400 bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-4">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="font-medium text-green-800 dark:text-green-200">All Systems Operational</h4>
+                                                <p class="text-sm text-green-700 dark:text-green-300">No critical issues detected</p>
+                                            </div>
+                                            <span class="text-xs text-green-600 dark:text-green-400">OK</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Management View -->
+                    <div id="users-view" class="view-content hidden">
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                                <h2 class="text-xl font-bold">User Management</h2>
+                                <div class="flex space-x-2 mt-4 sm:mt-0">
+                                    <button id="addUserBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">Add User</button>
+                                    <button id="exportDataBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Export Data</button>
+                                </div>
+                            </div>
+                            
+                            <!-- User Filters -->
+                            <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                                <select id="userTypeFilter" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                    <option value="all">All User Types</option>
+                                    <option value="farmer">Farmers</option>
+                                    <option value="supplier">Suppliers</option>
+                                    <option value="buyer">Buyers</option>
+                                </select>
+                                <select id="userStatusFilter" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="pending">Pending Verification</option>
+                                </select>
+                                <input id="userSearch" type="text" placeholder="Search users..." class="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white text-base">
+                            </div>
+                            
+                            <!-- Users Table -->
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sortable" data-sort="name">User</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sortable" data-sort="status">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sortable" data-sort="joined">Joined</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Active</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="userTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <!-- Users will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center">
+                                <div id="userPaginationInfo" class="text-sm text-gray-600 dark:text-gray-400">Showing 1-10 of 245 users</div>
+                                <div class="flex space-x-2">
+                                    <button id="prevPageBtn" class="pagination-btn px-3 py-1 rounded-md disabled:opacity-50">Previous</button>
+                                    <button id="nextPageBtn" class="pagination-btn px-3 py-1 rounded-md">Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Monitoring View -->
+                    <div id="orders-view" class="view-content hidden">
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                                <h2 class="text-xl font-bold">Order Monitoring</h2>
+                                <div class="flex space-x-2 mt-4 sm:mt-0">
+                                    <button id="createOrderBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">Create Order</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Filters -->
+                            <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                <select id="orderTypeFilter" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                    <option value="all">All Order Types</option>
+                                    <option value="farm_supplies">Farm Supplies</option>
+                                    <option value="produce">Produce</option>
+                                    <option value="equipment">Equipment</option>
+                                </select>
+                                <select id="orderStatusFilter" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                    <option value="all">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <input id="orderDateFilter" type="date" class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                <input id="orderSearch" type="text" placeholder="Search orders..." class="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white text-base">
+                            </div>
+                            
+                            <!-- Orders Table -->
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order ID</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <!-- Orders will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-4 flex justify-between items-center">
+                                <div id="orderPaginationInfo" class="text-sm text-gray-600 dark:text-gray-400">Showing 1-10 of 89 orders</div>
+                                <div class="flex space-x-2">
+                                    <button id="prevOrderPageBtn" class="pagination-btn px-3 py-1 rounded-md disabled:opacity-50">Previous</button>
+                                    <button id="nextOrderPageBtn" class="pagination-btn px-3 py-1 rounded-md">Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Analytics View -->
+                    <div id="analytics-view" class="view-content hidden">
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                            <h2 class="text-xl font-bold mb-6">System Analytics</h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">98.7%</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">System Uptime</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">2.4s</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Avg. Response Time</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">12,489</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Daily Active Users</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">0.03%</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Error Rate</div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold mb-4">Traffic Overview</h3>
+                                    <div class="h-64">
+                                        <canvas id="trafficChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold mb-4">Performance Metrics</h3>
+                                    <div class="h-64">
+                                        <canvas id="performanceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold mb-4">User Activity by Region</h3>
+                                <div class="h-96">
+                                    <canvas id="regionalActivityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Reports View -->
+                    <div id="finance-view" class="view-content hidden">
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                            <h2 class="text-xl font-bold mb-6">Financial Reports</h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">Ksh 1,254,800</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Monthly Revenue</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">Ksh 7,439,200</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Quarterly Revenue</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">Ksh 28,953,100</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">Annual Revenue</div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold mb-4">Revenue Breakdown</h3>
+                                    <div class="h-64">
+                                        <canvas id="revenueChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold mb-4">Revenue Growth</h3>
+                                    <div class="h-64">
+                                        <canvas id="growthChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold mb-4">Financial Metrics</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Metric</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Month</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Previous Month</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">YoY Change</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm font-medium">Gross Revenue</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 1,254,800</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 1,123,500</td>
+                                                <td class="px-4 py-3 text-sm text-green-600 dark:text-green-400">+11.7%</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm font-medium">Net Profit</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 789,400</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 692,100</td>
+                                                <td class="px-4 py-3 text-sm text-green-600 dark:text-green-400">+14.1%</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm font-medium">Operating Costs</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 321,500</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 298,400</td>
+                                                <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">+7.7%</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm font-medium">Customer Acquisition Cost</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 1,875</td>
+                                                <td class="px-4 py-3 text-sm">Ksh 2,030</td>
+                                                <td class="px-4 py-3 text-sm text-green-600 dark:text-green-400">-7.6%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Settings View -->
+                    <div id="settings-view" class="view-content hidden">
+                        <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                            <h2 class="text-xl font-bold mb-6">System Settings</h2>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <!-- General Settings -->
+                                <div class="lg:col-span-2">
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+                                        <h3 class="text-lg font-semibold mb-4">General Settings</h3>
+                                        
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Platform Name</label>
+                                                <input type="text" value="AgriConnect" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Default Currency</label>
+                                                <select id="currencySelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <option>USD - US Dollar</option>
+                                                    <option>EUR - Euro</option>
+                                                    <option>GBP - British Pound</option>
+                                                    <option selected>KES - Kenyan Shilling</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Timezone</label>
+                                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <option>(UTC-05:00) Eastern Time</option>
+                                                    <option>(UTC-06:00) Central Time</option>
+                                                    <option>(UTC-07:00) Mountain Time</option>
+                                                    <option>(UTC-08:00) Pacific Time</option>
+                                                    <option selected>(UTC+03:00) East Africa Time</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="maintenanceMode" class="rounded text-primary focus:ring-primary">
+                                                <label for="maintenanceMode" class="ml-2 text-sm">Enable Maintenance Mode</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                                        <h3 class="text-lg font-semibold mb-4">Security Settings</h3>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="twoFactor" class="rounded text-primary focus:ring-primary" checked>
+                                                <label for="twoFactor" class="ml-2 text-sm">Require Two-Factor Authentication</label>
+                                            </div>
+                                            
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="passwordComplexity" class="rounded text-primary focus:ring-primary" checked>
+                                                <label for="passwordComplexity" class="ml-2 text-sm">Enforce Strong Passwords</label>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Session Timeout</label>
+                                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <option>15 minutes</option>
+                                                    <option>30 minutes</option>
+                                                    <option selected>1 hour</option>
+                                                    <option>2 hours</option>
+                                                    <option>4 hours</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Failed Login Attempts</label>
+                                                <input type="number" min="1" max="10" value="5" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- API & Notifications -->
+                                <div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+                                        <h3 class="text-lg font-semibold mb-4">API Configuration</h3>
+                                        
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Payment Gateway</label>
+                                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <option>Stripe</option>
+                                                    <option>PayPal</option>
+                                                    <option>Braintree</option>
+                                                    <option>M-Pesa</option>
+                                                    <option selected>Flutterwave</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">API Key</label>
+                                                <div class="flex">
+                                                    <input type="password" value="sk_test_51Hx7yYJm8n9a1fZ" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <button class="bg-gray-200 dark:bg-gray-700 px-3 rounded-r-md">Show</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Webhook URL</label>
+                                                <input type="text" value="https://api.agriconnect.com/webhook" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                                        <h3 class="text-lg font-semibold mb-4">Notification Settings</h3>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="emailNotifications" class="rounded text-primary focus:ring-primary" checked>
+                                                <label for="emailNotifications" class="ml-2 text-sm">Email Notifications</label>
+                                            </div>
+                                            
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="pushNotifications" class="rounded text-primary focus:ring-primary" checked>
+                                                <label for="pushNotifications" class="ml-2 text-sm">Push Notifications</label>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Notification Frequency</label>
+                                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                                    <option>Immediately</option>
+                                                    <option>Hourly</option>
+                                                    <option selected>Daily Summary</option>
+                                                    <option>Weekly Summary</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium mb-1">Admin Email</label>
+                                                <input type="email" value="admin@agriconnect.com" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-end">
+                                <button id="cancelSettingsBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md mr-2">Cancel</button>
+                                <button id="saveSettingsBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">Save Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Add New User</h3>
+                    <button id="closeUserModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="addUserForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Full Name</label>
+                        <input type="text" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">User Type</label>
+                        <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                            <option>Farmer</option>
+                            <option>Supplier</option>
+                            <option>Buyer</option>
+                            <option>Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Status</label>
+                        <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                            <option>Active</option>
+                            <option>Inactive</option>
+                            <option>Pending</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" id="cancelUserBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Order Modal -->
+    <div id="createOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Create New Order</h3>
+                    <button id="closeOrderModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="createOrderForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Customer</label>
+                        <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                            <option>Green Farms Inc</option>
+                            <option>Harvest Direct</option>
+                            <option>Organic Valley Coop</option>
+                            <option>Crop Masters LLC</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Product</label>
+                        <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                            <option>Organic Fertilizer (50kg)</option>
+                            <option>Maize Seeds (Premium)</option>
+                            <option>Farm Tools Set</option>
+                            <option>Irrigation System</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Quantity</label>
+                            <input type="number" min="1" value="1" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Unit Price (Ksh)</label>
+                            <input type="number" min="1" value="2500" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Status</label>
+                        <select class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white">
+                            <option>Pending</option>
+                            <option>Processing</option>
+                            <option>Shipped</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" id="cancelOrderBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary">Create Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data in JSON format
+        const mockUserData = {
+            users: [
+                { id: 1, name: "John Smith", email: "john.smith@email.com", type: "farmer", status: "active", joined: "Jan 15, 2023", lastActive: "2 hours ago" },
+                { id: 2, name: "Emma Johnson", email: "emma.j@agripro.com", type: "supplier", status: "active", joined: "Feb 3, 2023", lastActive: "1 day ago" },
+                { id: 3, name: "Michael Brown", email: "michael@farmfresh.com", type: "buyer", status: "pending", joined: "Mar 22, 2023", lastActive: "5 days ago" },
+                { id: 4, name: "Sarah Davis", email: "sarahd@cropmasters.com", type: "farmer", status: "inactive", joined: "Apr 10, 2023", lastActive: "3 weeks ago" },
+                { id: 5, name: "Robert Wilson", email: "rob@agrisupply.com", type: "supplier", status: "active", joined: "May 5, 2023", lastActive: "1 hour ago" },
+                { id: 6, name: "Jennifer Lee", email: "jlee@harvestdirect.com", type: "buyer", status: "active", joined: "Jun 12, 2023", lastActive: "30 minutes ago" },
+                { id: 7, name: "David Miller", email: "david@organicfarms.com", type: "farmer", status: "pending", joined: "Jun 18, 2023", lastActive: "2 days ago" },
+                { id: 8, name: "Amanda Taylor", email: "amanda@greenvalley.com", type: "supplier", status: "inactive", joined: "Jun 20, 2023", lastActive: "1 month ago" },
+                { id: 9, name: "James Anderson", email: "james@cropcircle.com", type: "buyer", status: "active", joined: "Jun 22, 2023", lastActive: "5 hours ago" },
+                { id: 10, name: "Linda Martinez", email: "linda@farmersmarket.com", type: "farmer", status: "active", joined: "Jun 25, 2023", lastActive: "10 minutes ago" }
+            ],
+            total: 245
+        };
+        
+        const mockOrderData = {
+            orders: [
+                { id: "ORD-78901", customer: "Green Farms Inc", date: "Jun 15, 2023", amount: 245000, status: "processing" },
+                { id: "ORD-78902", customer: "Harvest Direct", date: "Jun 14, 2023", amount: 178050, status: "shipped" },
+                { id: "ORD-78903", customer: "Organic Valley Coop", date: "Jun 12, 2023", amount: 321075, status: "delivered" },
+                { id: "ORD-78904", customer: "Crop Masters LLC", date: "Jun 10, 2023", amount: 89025, status: "cancelled" },
+                { id: "ORD-78905", customer: "Farm Fresh Ltd", date: "Jun 8, 2023", amount: 153000, status: "pending" },
+                { id: "ORD-78906", customer: "Agri Solutions", date: "Jun 5, 2023", amount: 210500, status: "processing" },
+                { id: "ORD-78907", customer: "Green Valley Farms", date: "Jun 3, 2023", amount: 98000, status: "delivered" },
+                { id: "ORD-78908", customer: "Nature's Best", date: "Jun 1, 2023", amount: 126750, status: "shipped" },
+                { id: "ORD-78909", customer: "Eco Farmers Coop", date: "May 29, 2023", amount: 185000, status: "processing" },
+                { id: "ORD-78910", customer: "Sustainable Harvest", date: "May 27, 2023", amount: 215300, status: "pending" }
+            ],
+            total: 89
+        };
+        
+        // Initialize dark mode
+        function initDarkMode() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            });
+            
+            document.getElementById('toggleDarkMode').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                // Save preference to localStorage
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                localStorage.setItem('darkMode', isDarkMode);
+            });
+            
+            // Load saved preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        // Setup navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const viewName = btn.getAttribute('data-view');
+                    switchView(viewName);
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-btn').forEach(navBtn => {
+                        navBtn.classList.remove('bg-primary', 'bg-opacity-10', 'text-primary');
+                        navBtn.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                    });
+                    
+                    btn.classList.add('bg-primary', 'bg-opacity-10', 'text-primary');
+                    btn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                    
+                    // Initialize charts when switching to analytics or finance views
+                    if (viewName === 'analytics') {
+                        setTimeout(initAnalyticsCharts, 100);
+                    }
+                    if (viewName === 'finance') {
+                        setTimeout(initFinanceCharts, 100);
+                    }
+                    if (viewName === 'orders') {
+                        setTimeout(initOrderCharts, 100);
+                    }
+                });
+            });
+        }
+
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view-content').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show selected view
+            const selectedView = document.getElementById(`${viewName}-view`);
+            selectedView.classList.remove('hidden');
+        }
+
+        // Setup user menu
+        function setupUserMenu() {
+            document.getElementById('userMenuBtn').addEventListener('click', () => {
+                document.getElementById('userMenu').classList.toggle('hidden');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', event => {
+                const userMenu = document.getElementById('userMenu');
+                const userMenuBtn = document.getElementById('userMenuBtn');
+                
+                if (!userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Initialize analytics charts
+        function initAnalyticsCharts() {
+            // Traffic Chart
+            const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+            new Chart(trafficCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Website Visits',
+                        data: [12000, 19000, 15000, 18000, 22000, 25000],
+                        borderColor: '#5D5CDE',
+                        backgroundColor: 'rgba(93, 92, 222, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Performance Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['API Response', 'Page Load', 'DB Queries', 'Image Processing'],
+                    datasets: [{
+                        label: 'Time (ms)',
+                        data: [320, 420, 210, 380],
+                        backgroundColor: [
+                            'rgba(93, 92, 222, 0.7)',
+                            'rgba(79, 79, 199, 0.7)',
+                            'rgba(65, 66, 176, 0.7)',
+                            'rgba(51, 53, 153, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Regional Activity Chart
+            const regionCtx = document.getElementById('regionalActivityChart').getContext('2d');
+            new Chart(regionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['North America', 'Europe', 'Asia', 'South America', 'Africa', 'Oceania'],
+                    datasets: [{
+                        label: 'Users by Region',
+                        data: [35, 28, 20, 10, 5, 2],
+                        backgroundColor: [
+                            'rgba(93, 92, 222, 0.7)',
+                            'rgba(79, 79, 199, 0.7)',
+                            'rgba(65, 66, 176, 0.7)',
+                            'rgba(51, 53, 153, 0.7)',
+                            'rgba(37, 40, 130, 0.7)',
+                            'rgba(23, 27, 107, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Initialize finance charts
+        function initFinanceCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Farm Supplies', 'Produce', 'Equipment', 'Services'],
+                    datasets: [{
+                        label: 'Revenue by Category',
+                        data: [45, 30, 15, 10],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(245, 158, 11, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Growth Chart
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Q1 2022', 'Q2 2022', 'Q3 2022', 'Q4 2022', 'Q1 2023', 'Q2 2023'],
+                    datasets: [{
+                        label: 'Quarterly Revenue',
+                        data: [1850000, 2100000, 1980000, 2250000, 2400000, 2650000],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize order charts
+        function initOrderCharts() {
+            const orderCtx = document.getElementById('orderStatusChart').getContext('2d');
+            new Chart(orderCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+                    datasets: [{
+                        label: 'Orders by Status',
+                        data: [24, 32, 18, 22, 4],
+                        backgroundColor: [
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Populate user management table
+        function populateUserTable() {
+            const userTableBody = document.getElementById('userTableBody');
+            const userTypeFilter = document.getElementById('userTypeFilter').value;
+            const userStatusFilter = document.getElementById('userStatusFilter').value;
+            const userSearch = document.getElementById('userSearch').value.toLowerCase();
+            
+            // Filter users
+            const filteredUsers = mockUserData.users.filter(user => {
+                const matchesType = userTypeFilter === 'all' || user.type === userTypeFilter;
+                const matchesStatus = userStatusFilter === 'all' || user.status === userStatusFilter;
+                const matchesSearch = userSearch === '' || 
+                    user.name.toLowerCase().includes(userSearch) || 
+                    user.email.toLowerCase().includes(userSearch);
+                
+                return matchesType && matchesStatus && matchesSearch;
+            });
+            
+            userTableBody.innerHTML = '';
+            
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Status badge colors
+                const statusColors = {
+                    active: { bg: 'bg-green-100', text: 'text-green-800', darkBg: 'dark:bg-green-900', darkText: 'dark:text-green-300' },
+                    inactive: { bg: 'bg-gray-100', text: 'text-gray-800', darkBg: 'dark:bg-gray-700', darkText: 'dark:text-gray-300' },
+                    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', darkBg: 'dark:bg-yellow-900', darkText: 'dark:text-yellow-300' }
+                };
+                
+                // Type badge colors
+                const typeColors = {
+                    farmer: { bg: 'bg-green-100', text: 'text-green-800', darkBg: 'dark:bg-green-900', darkText: 'dark:text-green-300' },
+                    supplier: { bg: 'bg-blue-100', text: 'text-blue-800', darkBg: 'dark:bg-blue-900', darkText: 'dark:text-blue-300' },
+                    buyer: { bg: 'bg-purple-100', text: 'text-purple-800', darkBg: 'dark:bg-purple-900', darkText: 'dark:text-purple-300' }
+                };
+                
+                const status = statusColors[user.status];
+                const type = typeColors[user.type];
+                
+                // Get initials for avatar
+                const initials = user.name.split(' ').map(n => n[0]).join('');
+                // Random avatar color
+                const avatarColors = ['bg-green-100', 'bg-blue-100', 'bg-purple-100', 'bg-yellow-100', 'bg-pink-100'];
+                const textColors = ['text-green-600', 'text-blue-600', 'text-purple-600', 'text-yellow-600', 'text-pink-600'];
+                const darkBg = ['dark:bg-green-900', 'dark:bg-blue-900', 'dark:bg-purple-900', 'dark:bg-yellow-900', 'dark:bg-pink-900'];
+                const darkText = ['dark:text-green-400', 'dark:text-blue-400', 'dark:text-purple-400', 'dark:text-yellow-400', 'dark:text-pink-400'];
+                
+                const randomIndex = Math.floor(Math.random() * avatarColors.length);
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 ${avatarColors[randomIndex]} ${darkBg[randomIndex]} dark:bg-opacity-30 rounded-full flex items-center justify-center">
+                                <span class="${textColors[randomIndex]} ${darkText[randomIndex]} font-medium">${initials}</span>
+                            </div>
+                            <div class="ml-3">
+                                <div class="font-medium">${user.name}</div>
+                                <div class="text-sm text-gray-500">${user.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full ${type.bg} ${type.text} ${type.darkBg} ${type.darkText}">${user.type.charAt(0).toUpperCase() + user.type.slice(1)}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full ${status.bg} ${status.text} ${status.darkBg} ${status.darkText}">${user.status.charAt(0).toUpperCase() + user.status.slice(1)}</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">${user.joined}</td>
+                    <td class="px-4 py-3 text-sm">${user.lastActive}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="edit-user text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" data-id="${user.id}">Edit</button>
+                            <button class="suspend-user text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="${user.id}">Suspend</button>
+                        </div>
+                    </td>
+                `;
+                
+                userTableBody.appendChild(row);
+            });
+            
+            // Update pagination info
+            document.getElementById('userPaginationInfo').textContent = `Showing 1-${filteredUsers.length} of ${filteredUsers.length} users`;
+        }
+        
+        // Populate order management table
+        function populateOrderTable() {
+            const orderTableBody = document.getElementById('orderTableBody');
+            const orderTypeFilter = document.getElementById('orderTypeFilter').value;
+            const orderStatusFilter = document.getElementById('orderStatusFilter').value;
+            const orderDateFilter = document.getElementById('orderDateFilter').value;
+            const orderSearch = document.getElementById('orderSearch').value.toLowerCase();
+            
+            // Filter orders
+            const filteredOrders = mockOrderData.orders.filter(order => {
+                // In a real app, we would have actual order types and dates to filter by
+                const matchesType = orderTypeFilter === 'all'; 
+                const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter;
+                const matchesDate = !orderDateFilter; // Simplified for demo
+                const matchesSearch = orderSearch === '' || 
+                    order.id.toLowerCase().includes(orderSearch) || 
+                    order.customer.toLowerCase().includes(orderSearch);
+                
+                return matchesType && matchesStatus && matchesDate && matchesSearch;
+            });
+            
+            orderTableBody.innerHTML = '';
+            
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Status badge colors
+                const statusColors = {
+                    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', darkBg: 'dark:bg-yellow-900', darkText: 'dark:text-yellow-300' },
+                    processing: { bg: 'bg-blue-100', text: 'text-blue-800', darkBg: 'dark:bg-blue-900', darkText: 'dark:text-blue-300' },
+                    shipped: { bg: 'bg-purple-100', text: 'text-purple-800', darkBg: 'dark:bg-purple-900', darkText: 'dark:text-purple-300' },
+                    delivered: { bg: 'bg-green-100', text: 'text-green-800', darkBg: 'dark:bg-green-900', darkText: 'dark:text-green-300' },
+                    cancelled: { bg: 'bg-red-100', text: 'text-red-800', darkBg: 'dark:bg-red-900', darkText: 'dark:text-red-300' }
+                };
+                
+                const status = statusColors[order.status];
+                const amountFormatted = new Intl.NumberFormat('en-KE', { 
+                    style: 'currency', 
+                    currency: 'KES',
+                    minimumFractionDigits: 0
+                }).format(order.amount);
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm font-medium">${order.id}</td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium">${order.customer}</div>
+                    </td>
+                    <td class="px-4 py-3 text-sm">${order.date}</td>
+                    <td class="px-4 py-3 text-sm">${amountFormatted}</td>
+                    <td class="px-4 py-3">
+                        <span class="status-badge ${status.bg} ${status.text} ${status.darkBg} ${status.darkText}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">View</button>
+                            <button class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">Update</button>
+                        </div>
+                    </td>
+                `;
+                
+                orderTableBody.appendChild(row);
+            });
+            
+            // Update pagination info
+            document.getElementById('orderPaginationInfo').textContent = `Showing 1-${filteredOrders.length} of ${filteredOrders.length} orders`;
+        }
+        
+        // Setup user management filtering
+        function setupUserFilters() {
+            const userTypeFilter = document.getElementById('userTypeFilter');
+            const userStatusFilter = document.getElementById('userStatusFilter');
+            const userSearch = document.getElementById('userSearch');
+            
+            [userTypeFilter, userStatusFilter].forEach(filter => {
+                filter.addEventListener('change', populateUserTable);
+            });
+            
+            userSearch.addEventListener('keyup', populateUserTable);
+        }
+        
+        // Setup order management filtering
+        function setupOrderFilters() {
+            const orderTypeFilter = document.getElementById('orderTypeFilter');
+            const orderStatusFilter = document.getElementById('orderStatusFilter');
+            const orderDateFilter = document.getElementById('orderDateFilter');
+            const orderSearch = document.getElementById('orderSearch');
+            
+            [orderTypeFilter, orderStatusFilter, orderDateFilter].forEach(filter => {
+                filter.addEventListener('change', populateOrderTable);
+            });
+            
+            orderSearch.addEventListener('keyup', populateOrderTable);
+        }
+        
+        // Setup modals
+        function setupModals() {
+            // Add User Modal
+            const addUserModal = document.getElementById('addUserModal');
+            const addUserBtn = document.getElementById('addUserBtn');
+            const closeUserModal = document.getElementById('closeUserModal');
+            const cancelUserBtn = document.getElementById('cancelUserBtn');
+            const addUserForm = document.getElementById('addUserForm');
+            
+            addUserBtn.addEventListener('click', () => {
+                addUserModal.style.display = 'flex';
+            });
+            
+            closeUserModal.addEventListener('click', () => {
+                addUserModal.style.display = 'none';
+            });
+            
+            cancelUserBtn.addEventListener('click', () => {
+                addUserModal.style.display = 'none';
+            });
+            
+            addUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('User added successfully!');
+                addUserModal.style.display = 'none';
+                // In a real app, you would add the user to the data and re-render the table
+            });
+            
+            // Create Order Modal
+            const createOrderModal = document.getElementById('createOrderModal');
+            const createOrderBtn = document.getElementById('createOrderBtn');
+            const closeOrderModal = document.getElementById('closeOrderModal');
+            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+            const createOrderForm = document.getElementById('createOrderForm');
+            
+            createOrderBtn.addEventListener('click', () => {
+                createOrderModal.style.display = 'flex';
+            });
+            
+            closeOrderModal.addEventListener('click', () => {
+                createOrderModal.style.display = 'none';
+            });
+            
+            cancelOrderBtn.addEventListener('click', () => {
+                createOrderModal.style.display = 'none';
+            });
+            
+            createOrderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Order created successfully!');
+                createOrderModal.style.display = 'none';
+                // In a real app, you would add the order to the data and re-render the table
+            });
+            
+            // Export Data Button
+            document.getElementById('exportDataBtn').addEventListener('click', () => {
+                alert('Exporting data to PDF...');
+                // In a real app, this would generate and download a PDF
+            });
+            
+            // Settings buttons
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                alert('Settings saved successfully!');
+            });
+            
+            document.getElementById('cancelSettingsBtn').addEventListener('click', () => {
+                alert('Changes discarded');
+            });
+        }
+        
+        // Setup user actions
+        function setupUserActions() {
+            // Event delegation for edit and suspend buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('edit-user')) {
+                    const userId = e.target.getAttribute('data-id');
+                    alert(`Editing user with ID: ${userId}`);
+                }
+                
+                if (e.target.classList.contains('suspend-user')) {
+                    const userId = e.target.getAttribute('data-id');
+                    if (confirm(`Are you sure you want to suspend user with ID: ${userId}?`)) {
+                        alert(`User ${userId} suspended successfully`);
+                    }
+                }
+            });
+        }
+        
+        // Initialize app
+        function initApp() {
+            initDarkMode();
+            setupNavigation();
+            setupUserMenu();
+            populateUserTable();
+            populateOrderTable();
+            setupUserFilters();
+            setupOrderFilters();
+            setupModals();
+            setupUserActions();
+            
+            // Initialize charts for the initial dashboard view
+            setTimeout(() => {
+                initAnalyticsCharts();
+                initFinanceCharts();
+                initOrderCharts();
+            }, 100);
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

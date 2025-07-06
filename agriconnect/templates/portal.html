@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriConnect - Supply Chain Management</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='portal.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/marked@4.0.2/marked.min.js"></script>
     <script>
@@ -24,50 +25,6 @@
             }
         }
     </script>
-    <style>
-        .loading-spinner {
-            border: 3px solid rgba(93, 92, 222, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid #5D5CDE;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .badge-animate {
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #5D5CDE;
-            border-radius: 3px;
-        }
-        
-        .dark ::-webkit-scrollbar-thumb {
-            background: #7776E7;
-        }
-    </style>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-dark-text transition-colors duration-200">
     <div class="min-h-screen flex flex-col">
@@ -168,6 +125,26 @@
                             <!-- Welcome Card -->
                             <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
                                 <div class="flex items-start justify-between">
+                                    <div>
+                                        <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">{{  current_user.username }}</span>!</h2>
+                                        <p class="text-gray-600 dark:text-gray-400" id="userRole">You are logged in as a Farmer.</p>
+                                        <p class="mt-4">Farmer Details:</p>
+                                        <ul class="mt-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                            <li>Name <span id="pendingOrdersCount" class="font-medium text-primary">John Smith</span></li>
+                                            <li>Farm Name:<span id="inTransitOrdersCount" class="font-medium text-primary">Smith Family Farm</span></li>
+                                            <li><span id="completedOrdersCount" class="font-medium text-primary">8</span> orders completed this month</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">{{  current_user.username }}</span>!</h2>
+                                        <p class="text-gray-600 dark:text-gray-400" id="userRole">You are logged in as a Farmer.</p>
+                                        <p class="mt-4">Quick Summary:</p>
+                                        <ul class="mt-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                            <li>You have <span id="pendingOrdersCount" class="font-medium text-primary">3</span> pending orders</li>
+                                            <li><span id="inTransitOrdersCount" class="font-medium text-primary">2</span> orders are in transit</li>
+                                            <li><span id="completedOrdersCount" class="font-medium text-primary">8</span> orders completed this month</li>
+                                        </ul>
+                                    </div>
                                     <div>
                                         <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">{{  current_user.username }}</span>!</h2>
                                         <p class="text-gray-600 dark:text-gray-400" id="userRole">You are logged in as a Farmer.</p>

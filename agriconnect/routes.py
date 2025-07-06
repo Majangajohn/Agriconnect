@@ -33,7 +33,7 @@ def login():
             bcrypt.check_password_hash(user.password, form.password.data) :
                 login_user(user, remember=form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('portal'))
+                return redirect(next_page) if next_page else redirect(url_for('admin_portal'))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'farmer' :
@@ -69,7 +69,7 @@ def login():
             bcrypt.check_password_hash(buyer.password, form.password.data) :
                 login_user(buyer, remember=form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('portal'))
+                return redirect(next_page) if next_page else redirect(url_for('buyer_portal'))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         else:
@@ -160,7 +160,19 @@ def register():
 @app.route("/portal",methods = ['GET','POST'])
 @login_required
 def portal():
-    return render_template('portal.html', title='Portal')
+    return render_template('buyer2.html', title='Portal')
+
+# Route for dashboard after succeful login
+@app.route("/admin",methods = ['GET','POST'])
+@login_required
+def admin_portal():
+    return render_template('admin_portal.html', title='Admin Portal')
+
+# Route for dashboard after succeful login
+@app.route("/buyer",methods = ['GET','POST'])
+@login_required
+def buyer_portal():
+    return render_template('buyer2.html', title='Buyer Portal')
 
 # function for sending email
 def send_set_reset_email(user, level):

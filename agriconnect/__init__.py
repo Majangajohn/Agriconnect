@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bcrypt import Bcrypt
-from flask_migrate import Migrate
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -28,8 +27,6 @@ app.config['MAIL_USERNAME'] = 'jnmajanga@gmail.com'
 app.config['MAIL_PASSWORD'] = 'uxyv kpdt xbhh aiie'
 mail = Mail(app)
 
-migrate = Migrate(app, db)
 
 # Main function to run the Flask app
 from agriconnect import routes
-from agriconnect import models  # ensure models are loaded
