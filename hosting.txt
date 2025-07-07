@@ -60,22 +60,23 @@ Sudo ufw enable
 Sudo ufw status
 
 
-To use virtual env
+#To use virtual env
 sudo apt install python3-pip
 sudo apt install python3-venv
 
-Commands used in virtual env
+#Commands used in virtual env
 
 pip freeze
 
-To create virtual inv with your app
+#To create virtual inv with your app
 
-Python3  -m venv Agriconnect/venv
+python -m venv Agriconnect\venv
 
-To activate virtual environment
+
+#To activate virtual environment
  source venv/bin/activate
 
-To install all your requirements run
+#To install all your requirements run
 
 pip install -r requirements.txt
 

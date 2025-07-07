@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriConnect - Supplier Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#4F4FC7',
+                        dark: {
+                            bg: '#181818',
+                            card: '#252525',
+                            text: '#E5E5E5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .nav-btn.active {
+            background-color: rgba(93, 92, 222, 0.1);
+            color: #5D5CDE;
+        }
+        
+        .stat-card {
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #5D5CDE;
+            z-index: 2;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 24px;
+            bottom: -20px;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .toast {
+            animation: slideIn 0.3s forwards, fadeOut 0.5s forwards 2.5s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-dark-text transition-colors duration-200">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-dark-card shadow-sm">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-leaf text-2xl text-green-500 mr-2"></i>
+                    <h1 class="text-xl md:text-2xl font-bold">AgriConnect - Supplier Portal</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="notificationBtn" class="relative p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span id="notificationBadge" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                    </button>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center focus:outline-none">
+                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span>SJ</span>
+                            </div>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card rounded-md shadow-lg z-10">
+                            <div class="py-1">
+                                <button id="toggleDarkMode" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 018.354-5.646z" />
+                                    </svg>
+                                    Toggle Dark Mode
+                                </button>
+                                <button class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Settings
+                                </button>
+                                <button class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <a href="{{ url_for('logout') }}"> Logout </a>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Dashboard -->
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Sidebar Navigation -->
+                <div class="w-full md:w-1/4 lg:w-1/5">
+                    <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-4">
+                        <nav>
+                            <ul class="space-y-1">
+                                <li>
+                                    <button data-view="dashboard" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left active">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        <span>Dashboard</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="orders" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        <span>Orders</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="inventory" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                        </svg>
+                                        <span>Inventory</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="tracking" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        <span>Delivery Tracking</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-view="analytics" class="nav-btn w-full flex items-center space-x-2 p-2 rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        <span>Analytics</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="w-full md:w-3/4 lg:w-4/5">
+                    <!-- Dashboard View -->
+                    <div id="dashboard-view" class="view-content">
+                        <div class="flex flex-col space-y-6">
+                            <!-- Welcome Card -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h2 class="text-xl font-bold mb-2">Welcome, <span id="userName">Sarah Johnson</span>!</h2>
+                                        <p class="text-gray-600 dark:text-gray-400" id="userRole">You are logged in as a Supplier</p>
+                                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p class="font-medium">Supplier Details:</p>
+                                                <ul class="mt-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                                    <li>Company: <span class="font-medium text-primary">AgriSupply Inc.</span></li>
+                                                    <li>Location: <span class="font-medium text-primary">Springfield, IL</span></li>
+                                                    <li>Account Since: <span class="font-medium text-primary">Jan 2022</span></li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium">Performance Metrics:</p>
+                                                <ul class="mt-2 list-disc list-inside text-gray-600 dark:text-gray-400">
+                                                    <li>Avg. Order Fulfillment: <span class="font-medium text-primary">2.3 days</span></li>
+                                                    <li>Customer Rating: <span class="font-medium text-primary">4.8/5.0</span></li>
+                                                    <li>Top Product: <span class="font-medium text-primary">Premium Seeds</span></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="hidden sm:block">
+                                        <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h.5A2.5 2.5 0 0020 5.5v-1.5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Overview -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Orders</p>
+                                            <h3 class="text-2xl font-bold mt-1">154</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↑ 12%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Completed Deliveries</p>
+                                            <h3 class="text-2xl font-bold mt-1">132</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↑ 8%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-green-100 dark:bg-green-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Inventory Value</p>
+                                            <h3 class="text-2xl font-bold mt-1">$28,745</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↑ 15%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Pending Orders</p>
+                                            <h3 class="text-2xl font-bold mt-1">22</h3>
+                                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">
+                                                <span>↓ 5%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-orange-100 dark:bg-orange-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <button id="manageInventoryBtn" class="flex flex-col items-center justify-center p-4 bg-green-100 dark:bg-green-900 dark:bg-opacity-20 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 dark:hover:bg-opacity-30 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                        </svg>
+                                        <span class="mt-2 text-sm font-medium">Manage Inventory</span>
+                                    </button>
+                                    <button id="trackOrderBtn" class="flex flex-col items-center justify-center p-4 bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 dark:hover:bg-opacity-30 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        <span class="mt-2 text-sm font-medium">Track Orders</span>
+                                    </button>
+                                    <button id="addProductDashboardBtn" class="flex flex-col items-center justify-center p-4 bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 dark:hover:bg-opacity-30 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <span class="mt-2 text-sm font-medium">Add New Product</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold">Recent Activity</h3>
+                                    <button class="text-sm text-primary hover:text-secondary">View All</button>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-start">
+                                        <div class="bg-green-100 dark:bg-green-900 dark:bg-opacity-20 p-2 rounded-full mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Order #ORD-12347 delivered</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">John Smith Farm • 2 hours ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-20 p-2 rounded-full mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Low stock: Premium Wheat Seeds</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Only 15kg remaining • 5 hours ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 p-2 rounded-full mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">New order #ORD-12348 received</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Green Acres Farm • 1 day ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders View -->
+                    <div id="orders-view" class="view-content hidden">
+                        <div class="flex flex-col space-y-6">
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                                    <h2 class="text-xl font-bold">Manage Orders</h2>
+                                    <div class="mt-4 sm:mt-0 flex gap-2">
+                                        <button id="exportOrdersBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                            Export
+                                        </button>
+                                        <button id="refreshOrdersBtn" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                            Refresh
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Filter Controls -->
+                                <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                                    <div class="flex-1">
+                                        <label for="orderStatusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                        <select id="orderStatusFilter" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="all">All</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="in-transit">In Transit</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="orderDateFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order Date</label>
+                                        <select id="orderDateFilter" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="all">All Time</option>
+                                            <option value="today">Today</option>
+                                            <option value="week">This Week</option>
+                                            <option value="month">This Month</option>
+                                            <option value="quarter">Last 3 Months</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="orderSearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+                                        <input type="text" id="orderSearch" placeholder="Search orders..." class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                    </div>
+                                </div>
+                                
+                                <!-- Orders Table -->
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order ID</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Farmer</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Items</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700" id="ordersTableBody">
+                                            <!-- Orders will be loaded dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400" id="ordersCount">
+                                    Showing 3 of 22 orders
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory View -->
+                    <div id="inventory-view" class="view-content hidden">
+                        <div class="flex flex-col space-y-6">
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                                    <h2 class="text-xl font-bold">Inventory Management</h2>
+                                    <button id="addProductBtn" class="mt-4 sm:mt-0 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">
+                                        <div class="flex items-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            <span>Add Product</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                
+                                <!-- Filter Controls -->
+                                <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                                    <div class="flex-1">
+                                        <label for="categoryFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                        <select id="categoryFilter" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="all">All Categories</option>
+                                            <option value="seeds">Seeds</option>
+                                            <option value="fertilizers">Fertilizers</option>
+                                            <option value="pesticides">Pesticides</option>
+                                            <option value="equipment">Equipment</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="stockFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Status</label>
+                                        <select id="stockFilter" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="all">All</option>
+                                            <option value="in-stock">In Stock</option>
+                                            <option value="low-stock">Low Stock</option>
+                                            <option value="out-of-stock">Out of Stock</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="inventorySearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+                                        <input type="text" id="inventorySearch" placeholder="Search products..." class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                                    </div>
+                                </div>
+                                
+                                <!-- Products Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="productsGrid">
+                                    <!-- Products will be loaded dynamically -->
+                                </div>
+                                <div class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400" id="productsCount">
+                                    Showing 5 of 12 products
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tracking View -->
+                    <div id="tracking-view" class="view-content hidden">
+                        <div class="flex flex-col space-y-6">
+                            <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                <h2 class="text-xl font-bold mb-6">Delivery Tracking</h2>
+                                
+                                <!-- Search Order for Tracking -->
+                                <div class="mb-6">
+                                    <label for="trackingOrderSearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enter Order ID to Track</label>
+                                    <div class="flex">
+                                        <input type="text" id="trackingOrderSearch" placeholder="e.g., ORD-12346" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-base">
+                                        <button id="trackOrderSearchBtn" class="px-4 py-2 bg-primary text-white rounded-r-md hover:bg-secondary transition-colors">
+                                            Track
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tracking Result -->
+                                <div id="trackingResult" class="hidden">
+                                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
+                                        <div class="flex flex-col sm:flex-row justify-between mb-4">
+                                            <div>
+                                                <h3 class="text-lg font-semibold" id="trackingOrderId">Order #ORD-12346</h3>
+                                                <p class="text-sm text-gray-600 dark:text-gray-400" id="trackingOrderDate">Ordered on: May 15, 2023</p>
+                                            </div>
+                                            <div class="mt-2 sm:mt-0">
+                                                <span id="trackingOrderStatus" class="inline-block px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:bg-opacity-30 dark:text-purple-300">In Transit</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Order Info -->
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                            <div>
+                                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">From</h4>
+                                                <p class="mt-1" id="trackingSupplier">AgriSupply Inc.</p>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">To</h4>
+                                                <p class="mt-1" id="trackingFarmer">River Valley Farm</p>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Estimated Delivery</h4>
+                                                <p class="mt-1" id="trackingETA">May 20, 2023</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tracking Timeline -->
+                                        <div class="relative">
+                                            <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                                            <div id="trackingTimeline" class="space-y-6">
+                                                <!-- Timeline items will be loaded here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Order Items Summary -->
+                                    <h3 class="text-lg font-semibold mb-3">Order Items</h3>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead>
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700" id="trackingItemsTable">
+                                                <!-- Order items will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- No Results State -->
+                                <div id="trackingNoResult" class="text-center py-8 hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p class="mt-2 text-gray-500 dark:text-gray-400">No order found with that ID</p>
+                                    <p class="text-sm text-gray-400 dark:text-gray-500">Please check the order ID and try again</p>
+                                </div>
+                                
+                                <!-- Initial Empty State -->
+                                <div id="trackingEmptyState" class="text-center py-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    <p class="mt-2 text-gray-500 dark:text-gray-400">Enter an order ID above to track a delivery</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics View -->
+                    <div id="analytics-view" class="view-content hidden">
+                        <div class="flex flex-col space-y-6">
+                            <!-- Overview Stats -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                            <h3 class="text-2xl font-bold mt-1">$28,745</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↑ 15%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Avg. Delivery Time</p>
+                                            <h3 class="text-2xl font-bold mt-1">3.8 days</h3>
+                                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">
+                                                <span>↑ 0.5 days</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-orange-100 dark:bg-orange-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Customer Satisfaction</p>
+                                            <h3 class="text-2xl font-bold mt-1">94%</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↑ 2%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-green-100 dark:bg-green-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-card bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Return Rate</p>
+                                            <h3 class="text-2xl font-bold mt-1">1.2%</h3>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                <span>↓ 0.3%</span>
+                                                <span class="text-gray-500 dark:text-gray-400">vs last month</span>
+                                            </p>
+                                        </div>
+                                        <div class="bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Analytics Charts -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Orders by Category -->
+                                <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <h3 class="text-lg font-semibold mb-4">Orders by Category</h3>
+                                    <div class="h-60 flex items-center justify-center">
+                                        <div id="categoryChart" class="w-full h-full">
+                                            <div class="h-full flex items-end justify-around gap-2">
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 bg-blue-500 dark:bg-blue-600 rounded-t-md" style="height: 65%"></div>
+                                                    <span class="text-xs mt-2">Seeds</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">65%</span>
+                                                </div>
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 bg-green-500 dark:bg-green-600 rounded-t-md" style="height: 40%"></div>
+                                                    <span class="text-xs mt-2">Fertilizers</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">40%</span>
+                                                </div>
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 bg-yellow-500 dark:bg-yellow-600 rounded-t-md" style="height: 25%"></div>
+                                                    <span class="text-xs mt-2">Pesticides</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">25%</span>
+                                                </div>
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-16 bg-purple-500 dark:bg-purple-600 rounded-t-md" style="height: 15%"></div>
+                                                    <span class="text-xs mt-2">Equipment</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">15%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Monthly Trends -->
+                                <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <h3 class="text-lg font-semibold mb-4">Monthly Revenue</h3>
+                                    <div class="h-60 flex items-center justify-center">
+                                        <div id="trendsChart" class="w-full h-full">
+                                            <div class="h-full flex items-end relative">
+                                                <div class="absolute bottom-0 left-0 right-0 h-px bg-gray-200 dark:bg-gray-700"></div>
+                                                <div class="absolute left-0 bottom-0 top-0 w-px bg-gray-200 dark:bg-gray-700"></div>
+                                                
+                                                <svg class="w-full h-full" viewBox="0 0 300 150" preserveAspectRatio="none">
+                                                    <polyline
+                                                        points="0,120 50,100 100,110 150,80 200,60 250,70 300,50"
+                                                        fill="none"
+                                                        stroke="#5D5CDE"
+                                                        stroke-width="2"
+                                                    />
+                                                    <polyline
+                                                        points="0,120 50,100 100,110 150,80 200,60 250,70 300,50"
+                                                        fill="rgba(93, 92, 222, 0.1)"
+                                                        stroke="none"
+                                                        points-to-close="0,150 300,150"
+                                                    />
+                                                </svg>
+                                                
+                                                <div class="absolute bottom-0 w-full flex justify-between px-4 text-xs text-gray-500 dark:text-gray-400">
+                                                    <div>Jan</div>
+                                                    <div>Feb</div>
+                                                    <div>Mar</div>
+                                                    <div>Apr</div>
+                                                    <div>May</div>
+                                                    <div>Jun</div>
+                                                    <div>Jul</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Top Products and Delivery Performance -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Top Products -->
+                                <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <h3 class="text-lg font-semibold mb-4">Top Products</h3>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead>
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Orders</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="px-4 py-3">Premium Wheat Seeds</td>
+                                                    <td class="px-4 py-3">Seeds</td>
+                                                    <td class="px-4 py-3">42</td>
+                                                    <td class="px-4 py-3">$4,850</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3">Organic NPK Fertilizer</td>
+                                                    <td class="px-4 py-3">Fertilizers</td>
+                                                    <td class="px-4 py-3">38</td>
+                                                    <td class="px-4 py-3">$3,960</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3">Hybrid Corn Seeds</td>
+                                                    <td class="px-4 py-3">Seeds</td>
+                                                    <td class="px-4 py-3">35</td>
+                                                    <td class="px-4 py-3">$3,850</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3">Bio Pest Control</td>
+                                                    <td class="px-4 py-3">Pesticides</td>
+                                                    <td class="px-4 py-3">29</td>
+                                                    <td class="px-4 py-3">$2,760</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3">Drip Irrigation Kit</td>
+                                                    <td class="px-4 py-3">Equipment</td>
+                                                    <td class="px-4 py-3">24</td>
+                                                    <td class="px-4 py-3">$4,320</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Delivery Performance -->
+                                <div class="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
+                                    <h3 class="text-lg font-semibold mb-4">Delivery Performance</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="flex justify-between mb-1">
+                                                <span class="text-sm font-medium">On-time Deliveries</span>
+                                                <span class="text-sm font-medium">85%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                <div class="bg-green-500 h-2.5 rounded-full" style="width: 85%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1">
+                                                <span class="text-sm font-medium">Delayed Deliveries</span>
+                                                <span class="text-sm font-medium">12%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 12%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between mb-1">
+                                                <span class="text-sm font-medium">Cancelled Orders</span>
+                                                <span class="text-sm font-medium">3%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                <div class="bg-red-500 h-2.5 rounded-full" style="width: 3%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <h4 class="text-sm font-medium mb-2">Average Delivery Times by Region</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm">North Region</span>
+                                                <span class="text-sm font-medium">2.3 days</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm">South Region</span>
+                                                <span class="text-sm font-medium">3.5 days</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm">East Region</span>
+                                                <span class="text-sm font-medium">4.1 days</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm">West Region</span>
+                                                <span class="text-sm font-medium">3.2 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-dark-card rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">Add New Product</h2>
+                    <button class="close-modal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="addProductForm">
+                    <div class="mb-4">
+                        <label for="productName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name</label>
+                        <input type="text" id="productName" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="Enter product name...">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="productCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                        <select id="productCategory" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="">-- Select Category --</option>
+                            <option value="seeds">Seeds</option>
+                            <option value="fertilizers">Fertilizers</option>
+                            <option value="pesticides">Pesticides</option>
+                            <option value="equipment">Equipment</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="productPrice" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 dark:text-gray-400">$</span>
+                                </div>
+                                <input type="number" id="productPrice" min="0.01" step="0.01" class="w-full border border-gray-300 dark:border-gray-600 rounded-md pl-7 pr-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="productUnit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
+                            <input type="text" id="productUnit" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="e.g., kg, bag, bottle">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="productStock" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Quantity</label>
+                        <input type="number" id="productStock" min="0" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="Enter available quantity...">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="productDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="productDescription" rows="3" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-dark-bg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="Describe the product..."></textarea>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="close-modal px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors">
+                            <div class="flex items-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span>Add Product</span>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Panel -->
+    <div id="notificationsPanel" class="hidden fixed right-0 top-16 mt-2 w-80 bg-white dark:bg-dark-card rounded-md shadow-lg z-50 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <h3 class="font-semibold">Notifications</h3>
+                <button id="markAllReadBtn" class="text-sm text-primary hover:text-secondary">Mark all as read</button>
+            </div>
+        </div>
+        <div id="notificationsList" class="max-h-96 overflow-y-auto">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20">
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="font-medium">New Order Received</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">2 min ago</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">You have received a new order #ORD-12349 from Green Acres Farm.</p>
+                <button class="view-order-notification mt-2 text-sm text-primary hover:text-secondary">
+                    View Order
+                </button>
+            </div>
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="font-medium">Inventory Alert</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">5 hours ago</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Premium Wheat Seeds stock is low. Only 15kg remaining.</p>
+            </div>
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="font-medium">Order Delivered</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Yesterday</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Order #ORD-12347 has been delivered to John Smith Farm.</p>
+            </div>
+        </div>
+        <div class="p-3 text-center border-t border-gray-200 dark:border-gray-700">
+            <button id="viewAllNotificationsBtn" class="text-sm text-primary hover:text-secondary">View all notifications</button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2">
+        <!-- Toasts will appear here -->
+    </div>
+
+    <script>
+        // Extended mock data for filtering and tracking demonstration
+        const mockData = {
+            orders: [
+                { id: 'ORD-12348', farmer: 'Green Acres Farm', date: 'May 20, 2023', items: '2x Corn Seeds, 3x Fertilizer', total: '$185.50', status: 'pending', statusClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300' },
+                { id: 'ORD-12347', farmer: 'John Smith Farm', date: 'May 18, 2023', items: '1x Drip Irrigation Kit', total: '$150.00', status: 'delivered', statusClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300' },
+                { id: 'ORD-12346', farmer: 'River Valley Farm', date: 'May 15, 2023', items: '5x Organic Fertilizer, 2x Pest Control', total: '$245.75', status: 'in-transit', statusClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:bg-opacity-30 dark:text-purple-300' },
+                { id: 'ORD-12345', farmer: 'Sunshine Fields', date: 'May 10, 2023', items: '3x Hybrid Corn Seeds', total: '$116.25', status: 'delivered', statusClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300' },
+                { id: 'ORD-12344', farmer: 'Mountain View Ranch', date: 'May 5, 2023', items: '10x Organic NPK Fertilizer', total: '$325.00', status: 'approved', statusClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:bg-opacity-30 dark:text-blue-300' },
+                { id: 'ORD-12343', farmer: 'Golden Harvest', date: 'May 1, 2023', items: '1x Tractor Attachment', total: '$450.00', status: 'cancelled', statusClass: 'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-300' }
+            ],
+            products: [
+                { id: 1, name: 'Premium Wheat Seeds', category: 'seeds', price: '$45.00/kg', stock: '15 kg', status: 'Low Stock', statusClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300', description: 'High-yield wheat seeds perfect for most climate conditions. Disease resistant variety that produces excellent quality grain.' },
+                { id: 2, name: 'Organic NPK Fertilizer', category: 'fertilizers', price: '$32.50/bag', stock: '42 bags', status: 'In Stock', statusClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300', description: 'Balanced NPK formula (10-10-10) for general purpose fertilization. OMRI certified for organic farming.' },
+                { id: 3, name: 'Drip Irrigation Kit', category: 'equipment', price: '$120.00/set', stock: '18 sets', status: 'In Stock', statusClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300', description: 'Complete drip irrigation system for up to 1/4 acre. Water-efficient design with durable components and easy installation.' },
+                { id: 4, name: 'Hybrid Corn Seeds', category: 'seeds', price: '$38.75/kg', stock: '25 kg', status: 'In Stock', statusClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300', description: 'Drought-resistant hybrid corn seeds with excellent yield potential. Fast maturity and strong stalks.' },
+                { id: 5, name: 'Bio Pest Control', category: 'pesticides', price: '$29.99/bottle', stock: '8 bottles', status: 'Low Stock', statusClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300', description: 'Natural pest control solution safe for organic farming. Controls a wide variety of common agricultural pests.' },
+                { id: 6, name: 'Soil Testing Kit', category: 'equipment', price: '$85.00/kit', stock: '5 kits', status: 'Low Stock', statusClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300', description: 'Professional soil testing kit to measure pH, nitrogen, phosphorus, and potassium levels for optimal crop growth.' },
+                { id: 7, name: 'Tomato Seeds', category: 'seeds', price: '$12.50/pack', stock: '0 packs', status: 'Out of Stock', statusClass: 'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-300', description: 'Heirloom tomato seeds with excellent flavor and high yield. Suitable for both greenhouse and outdoor cultivation.' }
+            ],
+            tracking: {
+                ORD12346: {
+                    id: 'ORD-12346',
+                    date: 'May 15, 2023',
+                    status: 'In Transit',
+                    statusClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:bg-opacity-30 dark:text-purple-300',
+                    supplier: 'AgriSupply Inc.',
+                    farmer: 'River Valley Farm',
+                    eta: 'May 20, 2023',
+                    timeline: [
+                        { date: 'May 15, 2023', time: '10:30 AM', description: 'Order placed', location: 'River Valley Farm' },
+                        { date: 'May 15, 2023', time: '2:15 PM', description: 'Order processed', location: 'AgriSupply Warehouse' },
+                        { date: 'May 16, 2023', time: '9:00 AM', description: 'Shipped', location: 'Springfield, IL' },
+                        { date: 'May 18, 2023', time: '3:45 PM', description: 'Out for delivery', location: 'River Valley Area' },
+                        { date: 'May 20, 2023', time: '9:30 AM', description: 'Estimated delivery', location: 'River Valley Farm' }
+                    ],
+                    items: [
+                        { name: 'Organic Fertilizer', quantity: '5 bags', price: '$32.50', total: '$162.50' },
+                        { name: 'Bio Pest Control', quantity: '2 bottles', price: '$29.99', total: '$59.98' },
+                        { name: 'Shipping', quantity: '', price: '', total: '$23.27' }
+                    ],
+                    orderTotal: '$245.75'
+                }
+            }
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize dark mode toggle
+            const toggleDarkMode = document.getElementById('toggleDarkMode');
+            toggleDarkMode.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                showToast('Dark mode ' + (document.documentElement.classList.contains('dark') ? 'enabled' : 'disabled'));
+            });
+
+            // User menu toggle
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userMenu.classList.toggle('hidden');
+            });
+
+            // Close user menu when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!userMenu.contains(e.target) && !userMenuBtn.contains(e.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            });
+
+            // Navigation functionality
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const views = document.querySelectorAll('.view-content');
+            
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const viewName = button.getAttribute('data-view');
+                    
+                    // Remove active class from all buttons
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Hide all views
+                    views.forEach(view => view.classList.add('hidden'));
+                    
+                    // Show selected view
+                    document.getElementById(`${viewName}-view`).classList.remove('hidden');
+                    
+                    // Load data for the view
+                    if (viewName === 'orders') loadOrders();
+                    if (viewName === 'inventory') loadInventory();
+                    if (viewName === 'tracking') resetTrackingView();
+                });
+            });
+
+            // Load initial views
+            loadOrders();
+            loadInventory();
+
+            // Dashboard quick actions
+            document.getElementById('manageInventoryBtn').addEventListener('click', () => {
+                document.querySelector('[data-view="inventory"]').click();
+            });
+
+            document.getElementById('trackOrderBtn').addEventListener('click', () => {
+                document.querySelector('[data-view="tracking"]').click();
+            });
+
+            document.getElementById('addProductDashboardBtn').addEventListener('click', () => {
+                showAddProductModal();
+            });
+
+            // Add product modal
+            const addProductModal = document.getElementById('addProductModal');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    addProductModal.classList.add('hidden');
+                });
+            });
+
+            document.getElementById('addProductBtn').addEventListener('click', showAddProductModal);
+
+            // Product form submission
+            document.getElementById('addProductForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addProductModal.classList.add('hidden');
+                showToast('Product added successfully!');
+                
+                // Reset form
+                e.target.reset();
+            });
+
+            // Orders filtering
+            document.getElementById('orderStatusFilter').addEventListener('change', filterOrders);
+            document.getElementById('orderDateFilter').addEventListener('change', filterOrders);
+            document.getElementById('orderSearch').addEventListener('input', filterOrders);
+            
+            // Inventory filtering
+            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+            document.getElementById('stockFilter').addEventListener('change', filterProducts);
+            document.getElementById('inventorySearch').addEventListener('input', filterProducts);
+            
+            // Tracking functionality
+            document.getElementById('trackOrderSearchBtn').addEventListener('click', showTrackingResult);
+            
+            // Notifications panel
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            
+            notificationBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationsPanel.classList.toggle('hidden');
+            });
+            
+            // Close notifications when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!notificationsPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                    notificationsPanel.classList.add('hidden');
+                }
+            });
+            
+            // Mark all notifications as read
+            document.getElementById('markAllReadBtn').addEventListener('click', () => {
+                document.getElementById('notificationBadge').classList.add('hidden');
+                showToast('All notifications marked as read');
+            });
+            
+            // Export orders button
+            document.getElementById('exportOrdersBtn').addEventListener('click', () => {
+                showToast('Orders exported successfully');
+            });
+            
+            // Refresh orders button
+            document.getElementById('refreshOrdersBtn').addEventListener('click', () => {
+                loadOrders();
+                showToast('Orders refreshed');
+            });
+        });
+
+        // Load orders into the table
+        function loadOrders() {
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            ordersTableBody.innerHTML = '';
+            
+            mockData.orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.classList.add('fade-in');
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="font-medium">${order.id}</span>
+                    </td>
+                    <td class="px-4 py-3">${order.farmer}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">${order.date}</td>
+                    <td class="px-4 py-3">
+                        <span class="line-clamp-1">${order.items}</span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">${order.total}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="inline-block px-3 py-1 text-xs rounded-full ${order.statusClass}">
+                            ${order.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <button class="text-primary hover:text-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                ordersTableBody.appendChild(row);
+            });
+            
+            document.getElementById('ordersCount').textContent = `Showing ${mockData.orders.length} orders`;
+        }
+
+        // Filter orders based on selections
+        function filterOrders() {
+            const statusFilter = document.getElementById('orderStatusFilter').value;
+            const dateFilter = document.getElementById('orderDateFilter').value;
+            const searchTerm = document.getElementById('orderSearch').value.toLowerCase();
+            
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            ordersTableBody.innerHTML = '';
+            
+            let filteredOrders = mockData.orders;
+            
+            // Apply status filter
+            if (statusFilter !== 'all') {
+                filteredOrders = filteredOrders.filter(order => 
+                    order.status.toLowerCase() === statusFilter.toLowerCase()
+                );
+            }
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredOrders = filteredOrders.filter(order => 
+                    order.id.toLowerCase().includes(searchTerm) ||
+                    order.farmer.toLowerCase().includes(searchTerm) ||
+                    order.items.toLowerCase().includes(searchTerm) ||
+                    order.total.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Apply date filter (simplified for demo)
+            if (dateFilter !== 'all') {
+                // In a real app, this would use actual dates
+                // For demo, we'll just show a subset
+                filteredOrders = filteredOrders.slice(0, 3);
+            }
+            
+            // Render filtered orders
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr');
+                row.classList.add('fade-in');
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="font-medium">${order.id}</span>
+                    </td>
+                    <td class="px-4 py-3">${order.farmer}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">${order.date}</td>
+                    <td class="px-4 py-3">
+                        <span class="line-clamp-1">${order.items}</span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">${order.total}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="inline-block px-3 py-1 text-xs rounded-full ${order.statusClass}">
+                            ${order.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <button class="text-primary hover:text-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                ordersTableBody.appendChild(row);
+            });
+            
+            document.getElementById('ordersCount').textContent = `Showing ${filteredOrders.length} of ${mockData.orders.length} orders`;
+        }
+
+        // Load products into the grid
+        function loadInventory() {
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = '';
+            
+            mockData.products.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('product-card', 'bg-white', 'dark:bg-dark-card', 'rounded-lg', 'shadow-sm', 'overflow-hidden', 'transition-all', 'fade-in');
+                card.innerHTML = `
+                    <div class="relative">
+                        <div class="bg-gray-100 dark:bg-gray-800 h-32 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                            </svg>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 text-xs rounded-full ${product.statusClass}">${product.status}</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold">${product.name}</h3>
+                            <span class="font-bold">${product.price}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="inline-block px-2 py-1 text-xs rounded-full ${
+                                product.category === 'seeds' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:bg-opacity-30 dark:text-blue-300' :
+                                product.category === 'fertilizers' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300' :
+                                product.category === 'pesticides' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300' :
+                                'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:bg-opacity-30 dark:text-purple-300'
+                            }">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">${product.description}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Stock: <span class="font-medium">${product.stock}</span></span>
+                            <button class="edit-product-btn text-primary hover:text-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsGrid.appendChild(card);
+            });
+            
+            document.getElementById('productsCount').textContent = `Showing ${mockData.products.length} of 12 products`;
+        }
+
+        // Filter products based on selections
+        function filterProducts() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
+            const searchTerm = document.getElementById('inventorySearch').value.toLowerCase();
+            
+            const productsGrid = document.getElementById('productsGrid');
+            productsGrid.innerHTML = '';
+            
+            let filteredProducts = mockData.products;
+            
+            // Apply category filter
+            if (categoryFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.category.toLowerCase() === categoryFilter.toLowerCase()
+                );
+            }
+            
+            // Apply stock filter
+            if (stockFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(product => {
+                    if (stockFilter === 'in-stock') return product.status === 'In Stock';
+                    if (stockFilter === 'low-stock') return product.status === 'Low Stock';
+                    if (stockFilter === 'out-of-stock') return product.status === 'Out of Stock';
+                    return true;
+                });
+            }
+            
+            // Apply search filter
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Render filtered products
+            filteredProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('product-card', 'bg-white', 'dark:bg-dark-card', 'rounded-lg', 'shadow-sm', 'overflow-hidden', 'transition-all', 'fade-in');
+                card.innerHTML = `
+                    <div class="relative">
+                        <div class="bg-gray-100 dark:bg-gray-800 h-32 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                            </svg>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 text-xs rounded-full ${product.statusClass}">${product.status}</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold">${product.name}</h3>
+                            <span class="font-bold">${product.price}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="inline-block px-2 py-1 text-xs rounded-full ${
+                                product.category === 'seeds' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:bg-opacity-30 dark:text-blue-300' :
+                                product.category === 'fertilizers' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300' :
+                                product.category === 'pesticides' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300' :
+                                'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:bg-opacity-30 dark:text-purple-300'
+                            }">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">${product.description}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Stock: <span class="font-medium">${product.stock}</span></span>
+                            <button class="edit-product-btn text-primary hover:text-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsGrid.appendChild(card);
+            });
+            
+            document.getElementById('productsCount').textContent = `Showing ${filteredProducts.length} of ${mockData.products.length} products`;
+        }
+
+        // Show add product modal
+        function showAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('hidden');
+        }
+
+        // Reset tracking view
+        function resetTrackingView() {
+            document.getElementById('trackingResult').classList.add('hidden');
+            document.getElementById('trackingNoResult').classList.add('hidden');
+            document.getElementById('trackingEmptyState').classList.remove('hidden');
+            document.getElementById('trackingOrderSearch').value = '';
+        }
+
+        // Show tracking result
+        function showTrackingResult() {
+            const orderId = document.getElementById('trackingOrderSearch').value.trim();
+            
+            if (!orderId) {
+                showToast('Please enter an order ID', 'error');
+                return;
+            }
+            
+            // For demo purposes - only ORD-12346 has tracking data
+            if (orderId === 'ORD-12346') {
+                const trackingData = mockData.tracking.ORD12346;
+                
+                document.getElementById('trackingEmptyState').classList.add('hidden');
+                document.getElementById('trackingNoResult').classList.add('hidden');
+                document.getElementById('trackingResult').classList.remove('hidden');
+                
+                // Set order details
+                document.getElementById('trackingOrderId').textContent = `Order ${trackingData.id}`;
+                document.getElementById('trackingOrderDate').textContent = `Ordered on: ${trackingData.date}`;
+                document.getElementById('trackingOrderStatus').textContent = trackingData.status;
+                document.getElementById('trackingOrderStatus').className = `inline-block px-3 py-1 text-sm rounded-full ${trackingData.statusClass}`;
+                document.getElementById('trackingSupplier').textContent = trackingData.supplier;
+                document.getElementById('trackingFarmer').textContent = trackingData.farmer;
+                document.getElementById('trackingETA').textContent = trackingData.eta;
+                
+                // Render timeline
+                const timelineContainer = document.getElementById('trackingTimeline');
+                timelineContainer.innerHTML = '';
+                
+                trackingData.timeline.forEach(event => {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.classList.add('timeline-item');
+                    timelineItem.innerHTML = `
+                        <div class="bg-white dark:bg-dark-card p-3 rounded-lg shadow-sm">
+                            <div class="flex justify-between">
+                                <span class="font-medium">${event.description}</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">${event.date} • ${event.time}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${event.location}</p>
+                        </div>
+                    `;
+                    timelineContainer.appendChild(timelineItem);
+                });
+                
+                // Render items
+                const itemsTable = document.getElementById('trackingItemsTable');
+                itemsTable.innerHTML = '';
+                
+                trackingData.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-3">${item.name}</td>
+                        <td class="px-4 py-3">${item.quantity}</td>
+                        <td class="px-4 py-3">${item.price}</td>
+                        <td class="px-4 py-3 font-medium">${item.total}</td>
+                    `;
+                    itemsTable.appendChild(row);
+                });
+                
+                // Add total row
+                const totalRow = document.createElement('tr');
+                totalRow.classList.add('border-t', 'border-gray-200', 'dark:border-gray-700');
+                totalRow.innerHTML = `
+                    <td class="px-4 py-3 font-medium" colspan="3">Total</td>
+                    <td class="px-4 py-3 font-bold">${trackingData.orderTotal}</td>
+                `;
+                itemsTable.appendChild(totalRow);
+                
+                showToast(`Tracking information for ${trackingData.id} loaded`);
+            } else {
+                document.getElementById('trackingEmptyState').classList.add('hidden');
+                document.getElementById('trackingResult').classList.add('hidden');
+                document.getElementById('trackingNoResult').classList.remove('hidden');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            toast.className = `toast px-4 py-3 rounded-md shadow-lg flex items-center ${
+                type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' :
+                type === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' :
+                'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+            }`;
+            
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="ml-4 text-lg" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

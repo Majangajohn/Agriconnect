@@ -7,6 +7,22 @@ from agriconnect.models import User, Farmer,Supplier, Buyer
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
 
+# redirect to corresponding portal
+def redirect_authenticated_user(user):
+    if isinstance(user, User):
+        return redirect(url_for('admin_portal'))
+    elif isinstance(user, Farmer):
+        return redirect(url_for('farmer_portal'))
+    elif isinstance(user, Supplier):
+        return redirect(url_for('supplier_portal'))
+    elif isinstance(user, Buyer):
+        return redirect(url_for('buyer_portal'))
+    else:
+        return redirect(url_for('home'))  # fallback
+
+
+
+
 # Route for home page
 @app.route("/")
 @app.route("/home")
@@ -16,8 +32,9 @@ def home():
 # Route for login page
 @app.route("/login", methods = ['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('portal'))
+
+    if current_user.is_authenticated :
+        return redirect_authenticated_user(current_user)
     form = LoginForm()
     if form.validate_on_submit():
 
@@ -45,7 +62,7 @@ def login():
             bcrypt.check_password_hash(farmer.password, form.password.data) :
                 login_user(farmer, remember=form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('portal'))
+                return redirect(next_page) if next_page else redirect(url_for('farmer_portal'))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'supplier' :
@@ -57,7 +74,7 @@ def login():
             bcrypt.check_password_hash(supplier.password, form.password.data) :
                 login_user(supplier, remember=form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('portal'))
+                return redirect(next_page) if next_page else redirect(url_for('supplier_portal'))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
         elif level == 'buyer' :
@@ -81,7 +98,7 @@ def login():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('portal'))
+        return redirect_authenticated_user(current_user)
 
     register_type_form = RegisterTypeForm()
     register_type = request.args.get('register_type')
@@ -157,10 +174,10 @@ def register():
 
 
 # Route for dashboard after succeful login
-@app.route("/portal",methods = ['GET','POST'])
+@app.route("/supplier",methods = ['GET','POST'])
 @login_required
-def portal():
-    return render_template('buyer2.html', title='Portal')
+def supplier_portal():
+    return render_template('supplier_portal.html', title='Supplier Portal')
 
 # Route for dashboard after succeful login
 @app.route("/admin",methods = ['GET','POST'])
@@ -172,7 +189,13 @@ def admin_portal():
 @app.route("/buyer",methods = ['GET','POST'])
 @login_required
 def buyer_portal():
-    return render_template('buyer2.html', title='Buyer Portal')
+    return render_template('buyer_portal.html', title='Buyer Portal')
+
+# Route for dashboard after succeful login
+@app.route("/farmer",methods = ['GET','POST'])
+@login_required
+def farmer_portal():
+    return render_template('farmer2.html', title='Farmer Portal')
 
 # function for sending email
 def send_set_reset_email(user, level):
@@ -194,7 +217,7 @@ def send_set_reset_email(user, level):
 @app.route("/confirm_registration/<string:level_type>",methods = ['GET','POST'])
 def confirm_registration(level_type):
     if current_user.is_authenticated:
-        return redirect(url_for('portal'))
+        return redirect_authenticated_user(current_user)
 
     form = ConfirmRegistration(level_type=level_type)
 
@@ -227,7 +250,7 @@ def confirm_registration(level_type):
 @app.route("/set_reset_password/<string:user_level>/<token>", methods=['GET', 'POST'])
 def set_reset_token(user_level,token):
     if current_user.is_authenticated:
-        return redirect(url_for('portal'))
+        return redirect_authenticated_user(current_user)
 
     user_level = user_level
     token = token
@@ -278,7 +301,7 @@ def about():
 def reset_password():
 
     if current_user.is_authenticated:
-        return redirect(url_for('portal'))
+        return redirect_authenticated_user(current_user)
     
     reset_password_form = RegisterTypeForm()
 

@@ -151,42 +151,43 @@ Virtual environment for isolated dependencies
 Clone the repository:
 Copy
 git clone https://github.com/your-username/agriconnect.git
-cd agriconnect
-Create a virtual environment:
-Copy
-python -m venv venv
-Activate the virtual environment:
-##Windows:
-Copy
-venv\Scripts\activate
-## macOS/Linux:
-Copy
-source venv/bin/activate
-Install Python dependencies:
-basic
-Copy
-pip install -r requirements.txt
-Create a .env file with your configuration:
 
-Copy
+cd agriconnect
+
+### Create a virtual environment:
+
+python -m venv venv
+
+## Activate the virtual environment:
+# Windows:
+venv\Scripts\activate
+
+## macOS/Linux:
+source venv/bin/activate
+
+## Install Python dependencies:
+pip install -r requirements.txt
+
+# Create a .env file with your configuration:
+
+# Copy
 FLASK_APP=run.py
 FLASK_ENV=development
 SECRET_KEY=your-secret-key
 DATABASE_URI=mysql+pymysql://username:password@localhost/agriconnect
 
-Initialize the database:
-Copy
+# Initialize the database:
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
-Run the application:
-Copy
+
+# Run the application:
 flask run
 Visit http://localhost:5000 in your browser
-Database Configuration
+
+## Database Configuration
 The database is configured in app/config.py which reads from environment variables. You can set your database URI in the .env file:
 
-Copy
 # For MySQL
 DATABASE_URI=mysql+pymysql://username:password@localhost/agriconnect
 
@@ -208,7 +209,7 @@ GET /api/crops/recommended/<location_id>: Returns crop recommendations for a loc
 
 ### Development Workflow
 Working on Features
-Create a new branch for each feature: git checkout -b feature/feature-name
+Create a new branch for each feature: git checkout -b feature-branch
 Make your changes, following the coding standards
 Write tests for your code
 Create a pull request for review
@@ -257,7 +258,8 @@ Open a Pull Request
 
 # Contact
 
-For hosting this are the commands used
+# For hosting this are the commands used
+hosting.txt
 
 John Nyange Majanga - Project Manager & Lead Developer
 
@@ -278,7 +280,7 @@ reccomendation algorithm
 
 
 #### Emotional context
-mmediate Action Plan
+Immediate Action Plan
 To accelerate progress, I recommend:
 Prioritize MVP Authentication:
 
@@ -303,7 +305,19 @@ Flask-RESTful for faster API development
 
 #### Visuals
 ![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example2.jpg)
+
 ![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example3.jpg)
+
 ![landing page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example4.jpg)
+
 ![login page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example5.jpg)
-![dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example6.jpg)
+
+![Registration page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example10.jpg)
+
+![Admin Dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example9.jpg)
+
+![Farmer Dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example6.jpg)
+
+![Buyer Dashboard page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example7.jpg)
+
+![Supplier page](https://github.com/Majangajohn/Agriconnect/tree/main/agriconnect/static/Profile_Pics/example8.jpg)
