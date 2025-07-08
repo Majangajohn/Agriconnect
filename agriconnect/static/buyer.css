@@ -1,0 +1,102 @@
+        .crop-card {
+            transition: all 0.3s ease;
+        }
+        .crop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .category-btn.active {
+            background-color: #5D5CDE;
+            color: white;
+        }
+        .order-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+        }
+        .search-container {
+            position: relative;
+        }
+        .search-container i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #EF4444;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        .tracking-progress {
+            position: relative;
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .tracking-progress-fill {
+            position: absolute;
+            height: 100%;
+            border-radius: 3px;
+        }
+        .tracking-step {
+            position: relative;
+            padding-top: 30px;
+            text-align: center;
+            flex: 1;
+        }
+        .tracking-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            z-index: 2;
+        }
+        .tracking-step.active::before {
+            background-color: #5D5CDE;
+            border: 3px solid #d0d1f9;
+        }
+        .tracking-step.completed::before {
+            background-color: #5D5CDE;
+        }
+        .tracking-step-text {
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }

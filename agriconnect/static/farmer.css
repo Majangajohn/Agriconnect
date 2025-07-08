@@ -1,0 +1,139 @@
+        .crop-health-bar {
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .crop-health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        .badge-animate {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+        }
+        .timeline-completed {
+            background-color: #10B981;
+        }
+        .timeline-active {
+            background-color: #3B82F6;
+        }
+        .timeline-upcoming {
+            background-color: #9CA3AF;
+        }
+        .sidebar-link.active {
+            background-color: rgba(93, 92, 222, 0.1);
+            color: #5D5CDE;
+        }
+        .soil-bar {
+            height: 10px;
+            border-radius: 5px;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .order-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+        .order-card:hover {
+            transform: translateX(5px);
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        .map-container {
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e0e7ff;
+            position: relative;
+        }
+        .map-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #4f46e5;
+            font-weight: 500;
+        }
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+        .active-filter {
+            background-color: #5D5CDE !important;
+            color: white !important;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #5d5cde;
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+        }
+        .invalid-feedback {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .is-invalid {
+            border-color: #ef4444 !important;
+        }
+        .is-invalid + .invalid-feedback {
+            display: block;
+        }
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }

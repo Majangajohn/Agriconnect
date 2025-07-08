@@ -195,7 +195,7 @@ def buyer_portal():
 @app.route("/farmer",methods = ['GET','POST'])
 @login_required
 def farmer_portal():
-    return render_template('farmer2.html', title='Farmer Portal')
+    return render_template('farmer.html', title='Farmer Portal')
 
 # function for sending email
 def send_set_reset_email(user, level):

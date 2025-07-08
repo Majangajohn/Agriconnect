@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriConnect - Farmer Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='farmer.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,101 +25,6 @@
             }
         }
     </script>
-    <style>
-        .crop-health-bar {
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .crop-health-fill {
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-        .badge-animate {
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .dashboard-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        .timeline-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-        }
-        .timeline-completed {
-            background-color: #10B981;
-        }
-        .timeline-active {
-            background-color: #3B82F6;
-        }
-        .timeline-upcoming {
-            background-color: #9CA3AF;
-        }
-        .sidebar-link.active {
-            background-color: rgba(93, 92, 222, 0.1);
-            color: #5D5CDE;
-        }
-        .soil-bar {
-            height: 10px;
-            border-radius: 5px;
-        }
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        .order-card {
-            transition: all 0.3s ease;
-            border-left: 4px solid;
-        }
-        .order-card:hover {
-            transform: translateX(5px);
-        }
-        .progress-bar {
-            height: 8px;
-            border-radius: 4px;
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-        }
-        .map-container {
-            height: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #e0e7ff;
-            position: relative;
-        }
-        .map-placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #4f46e5;
-            font-weight: 500;
-        }
-        .chart-container {
-            height: 250px;
-            position: relative;
-        }
-        .active-filter {
-            background-color: #5D5CDE !important;
-            color: white !important;
-        }
-    </style>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-dark-text transition-colors duration-200">
     <div class="min-h-screen flex flex-col">
@@ -1652,59 +1558,68 @@
                 
                 <form id="newOrderForm" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Category</label>
-                            <select class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary">
+                        <div class="form-group">
+                            <label class="form-label">Product Category</label>
+                            <select id="productCategory" class="form-control" required>
+                                <option value="">Select Category</option>
                                 <option>Seeds</option>
                                 <option>Fertilizers</option>
                                 <option>Equipment</option>
                                 <option>Tools</option>
                                 <option>Pesticides</option>
                             </select>
+                            <div class="invalid-feedback">Please select a category</div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product</label>
-                            <select class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary">
-                                <option>Organic Corn Seeds</option>
-                                <option>Wheat Seeds</option>
-                                <option>NPK Fertilizer</option>
-                                <option>Organic Compost</option>
+                        <div class="form-group">
+                            <label class="form-label">Product</label>
+                            <select id="product" class="form-control" required>
+                                <option value="">Select Product</option>
+                                <option data-price="45.00">Organic Corn Seeds</option>
+                                <option data-price="32.50">Wheat Seeds</option>
+                                <option data-price="89.99">NPK Fertilizer</option>
+                                <option data-price="24.75">Organic Compost</option>
+                                <option data-price="1250.00">Tractor Plow</option>
                             </select>
+                            <div class="invalid-feedback">Please select a product</div>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity</label>
-                            <input type="number" min="1" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary" value="1">
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="quantity" min="1" class="form-control" value="1" required>
+                            <div class="invalid-feedback">Please enter quantity</div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit Price</label>
-                            <input type="text" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary" value="$45.00" disabled>
+                        <div class="form-group">
+                            <label class="form-label">Unit Price</label>
+                            <input type="text" id="unitPrice" class="form-control" value="$0.00" disabled>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total</label>
-                            <input type="text" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary font-medium" value="$45.00" disabled>
+                        <div class="form-group">
+                            <label class="form-label">Total</label>
+                            <input type="text" id="totalPrice" class="form-control font-medium" value="$0.00" disabled>
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delivery Address</label>
-                        <textarea class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary h-24">Smith Family Farm, 123 Farm Lane, Rural County, State 12345</textarea>
+                    <div class="form-group">
+                        <label class="form-label">Delivery Address</label>
+                        <textarea id="deliveryAddress" class="form-control h-24" required>Smith Family Farm, 123 Farm Lane, Rural County, State 12345</textarea>
+                        <div class="invalid-feedback">Please enter delivery address</div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delivery Date</label>
-                            <input type="date" class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary">
+                        <div class="form-group">
+                            <label class="form-label">Delivery Date</label>
+                            <input type="date" id="deliveryDate" class="form-control" required>
+                            <div class="invalid-feedback">Please select a date</div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-                            <select class="w-full bg-gray-100 dark:bg-gray-700 border-0 rounded-lg p-2 focus:ring-primary focus:border-primary">
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select id="priority" class="form-control" required>
                                 <option>Standard</option>
                                 <option>Express</option>
                                 <option>Urgent</option>
                             </select>
+                            <div class="invalid-feedback">Please select priority</div>
                         </div>
                     </div>
                     
@@ -1712,7 +1627,7 @@
                         <button type="button" id="cancelOrderBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary">
+                        <button type="submit" id="submitOrderBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary flex items-center">
                             Place Order
                         </button>
                     </div>
@@ -1780,249 +1695,8 @@
         <!-- Toasts will be appended here -->
     </div>
 
-    <script>
-        // Initialize dark mode
-        function initDarkMode() {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.classList.add('dark');
-            }
-            
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (event.matches) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            });
-            
-            document.getElementById('toggleDarkMode').addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-            });
-        }
-        
-        // Navigation functionality
-        function setupNavigation() {
-            // Navigation
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const viewName = btn.getAttribute('data-view');
-                    switchView(viewName);
-                    
-                    // Update active state
-                    document.querySelectorAll('.nav-btn').forEach(navBtn => {
-                        navBtn.classList.remove('bg-primary', 'bg-opacity-10', 'text-primary');
-                        navBtn.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-700');
-                    });
-                    
-                    btn.classList.add('bg-primary', 'bg-opacity-10', 'text-primary');
-                    btn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-700');
-                });
-            });
-            
-            // Switch view
-            function switchView(viewName) {
-                // Hide all views
-                document.querySelectorAll('.view-content').forEach(view => {
-                    view.classList.add('hidden');
-                });
-                
-                // Show selected view
-                const selectedView = document.getElementById(`${viewName}-view`);
-                if (selectedView) {
-                    selectedView.classList.remove('hidden');
-                }
-            }
-        }
-        
-        // Setup event listeners
-        function setupEventListeners() {
-            // User menu toggle
-            document.getElementById('userMenuBtn').addEventListener('click', () => {
-                document.getElementById('userMenu').classList.toggle('hidden');
-            });
-            
-            // Notification button
-            document.getElementById('notificationBtn').addEventListener('click', () => {
-                document.getElementById('notificationsPanel').classList.toggle('hidden');
-            });
-            
-            // New order modal
-            document.getElementById('newOrderBtn').addEventListener('click', () => {
-                document.getElementById('newOrderModal').classList.remove('hidden');
-            });
-            
-            document.getElementById('quickNewOrder').addEventListener('click', () => {
-                document.getElementById('newOrderModal').classList.remove('hidden');
-            });
-            
-            document.getElementById('closeNewOrderModal').addEventListener('click', () => {
-                document.getElementById('newOrderModal').classList.add('hidden');
-            });
-            
-            document.getElementById('cancelOrderBtn').addEventListener('click', () => {
-                document.getElementById('newOrderModal').classList.add('hidden');
-            });
-            
-            // Order form submission
-            document.getElementById('newOrderForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                document.getElementById('newOrderModal').classList.add('hidden');
-                showToast('Order placed successfully!', 'success');
-                setTimeout(() => {
-                    switchView('orders');
-                }, 1500);
-            });
-            
-            // View order buttons
-            document.querySelectorAll('.view-order-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showToast('Opening order details...', 'info');
-                });
-            });
-            
-            // Print order buttons
-            document.querySelectorAll('.print-order-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showToast('Printing order details...', 'info');
-                });
-            });
-            
-            // Order status filter
-            document.getElementById('orderStatusFilter').addEventListener('change', function() {
-                filterOrders(this.value);
-            });
-            
-            // Order search
-            document.getElementById('orderSearch').addEventListener('input', function() {
-                searchOrders(this.value);
-            });
-            
-            // Inventory category filter
-            document.getElementById('inventoryCategoryFilter').addEventListener('change', function() {
-                filterInventory(this.value);
-            });
-            
-            // Inventory search
-            document.getElementById('inventorySearch').addEventListener('input', function() {
-                searchInventory(this.value);
-            });
-            
-            // Close panels when clicking outside
-            document.addEventListener('click', (event) => {
-                const userMenu = document.getElementById('userMenu');
-                const userMenuBtn = document.getElementById('userMenuBtn');
-                
-                if (!userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
-                    userMenu.classList.add('hidden');
-                }
-                
-                const notificationsPanel = document.getElementById('notificationsPanel');
-                const notificationBtn = document.getElementById('notificationBtn');
-                
-                if (!notificationBtn.contains(event.target) && !notificationsPanel.contains(event.target)) {
-                    notificationsPanel.classList.add('hidden');
-                }
-                
-                const newOrderModal = document.getElementById('newOrderModal');
-                const closeNewOrderModal = document.getElementById('closeNewOrderModal');
-                
-                if (newOrderModal && !newOrderModal.contains(event.target)) {
-                    newOrderModal.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Filter orders by status
-        function filterOrders(status) {
-            const rows = document.querySelectorAll('#ordersTableBody tr');
-            rows.forEach(row => {
-                if (status === 'all' || row.getAttribute('data-status') === status) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Search orders
-        function searchOrders(query) {
-            const rows = document.querySelectorAll('#ordersTableBody tr');
-            const lowerQuery = query.toLowerCase();
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(lowerQuery)) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Filter inventory by category
-        function filterInventory(category) {
-            const rows = document.querySelectorAll('#inventoryTableBody tr');
-            rows.forEach(row => {
-                if (category === 'all' || row.getAttribute('data-category') === category) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Search inventory
-        function searchInventory(query) {
-            const rows = document.querySelectorAll('#inventoryTableBody tr');
-            const lowerQuery = query.toLowerCase();
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(lowerQuery)) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-        }
-
-        // Show toast notification
-        function showToast(message, type = 'success', duration = 3000) {
-            const toastContainer = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            let bgColor = 'bg-green-500';
-            if (type === 'error') bgColor = 'bg-red-500';
-            if (type === 'warning') bgColor = 'bg-yellow-500';
-            if (type === 'info') bgColor = 'bg-blue-500';
-            
-            toast.className = `${bgColor} text-white px-4 py-2 rounded-md shadow-lg flex items-center justify-between max-w-sm`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button class="text-white ml-4">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            // Auto-remove toast
-            setTimeout(() => {
-                toast.remove();
-            }, duration);
-            
-            // Manual close
-            toast.querySelector('button').addEventListener('click', () => {
-                toast.remove();
-            });
-        }
-
-        // Initialize the application
-        window.addEventListener('DOMContentLoaded', () => {
-            initDarkMode();
-            setupNavigation();
-            setupEventListeners();
-        });
-    </script>
+    <!-- ...  Mock data in JSON format ... -->
+    <script src="{{ url_for('static', filename='farmer.js') }}"></script>
+    
 </body>
 </html>
